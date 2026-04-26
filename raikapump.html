@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Raika - Pump</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Oxanium:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-card: #1c2230;
+    --bg-input: #0d1117;
+    --accent-blue: #2563eb;
+    --accent-blue-glow: rgba(37,99,235,0.4);
+    --accent-green: #16a34a;
+    --accent-green-glow: rgba(22,163,74,0.4);
+    --accent-red: #dc2626;
+    --accent-red-glow: rgba(220,38,38,0.4);
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #484f58;
+    --border: #30363d;
+    --border-active: #388bfd;
+    --balloon-easy: #22c55e;
+    --balloon-medium: #3b82f6;
+    --balloon-hard: #ef4444;
+    --balloon-expert: #a855f7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-logo {
+    font-family: 'Oxanium', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+  }
+  .topbar-balance {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+  }
+  .topbar-balance .bal-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+  .topbar-balance .bal-value { font-family: 'Oxanium', sans-serif; font-size: 14px; font-weight: 700; color: #fbbf24; }
+  .fairness-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+  }
+  .fairness-btn svg { width: 13px; height: 13px; }
+
+  /* TAB SWITCH */
+  .tab-switch {
+    display: flex;
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+    margin: 14px 16px 0;
+    border: 1px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 9px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .tab-btn.active {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+
+  /* CONTROLS PANEL */
+  .controls {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .field-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .field-label span { color: var(--text-muted); font-size: 11px; font-weight: 500; text-transform: none; }
+
+  .bet-input-wrap {
+    display: flex;
+    align-items: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .bet-input-wrap:focus-within { border-color: var(--border-active); }
+  .currency-icon {
+    padding: 0 10px;
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-weight: 700;
+  }
+  .bet-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: 'Oxanium', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 10px 0;
+  }
+  .bet-actions {
+    display: flex;
+    border-left: 1px solid var(--border);
+  }
+  .bet-action-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .bet-action-btn:hover { color: var(--text-primary); }
+  .bet-action-btn:first-child { border-right: 1px solid var(--border); }
+  .bet-action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .bet-input:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .diff-select {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 10px 14px;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+  }
+  .diff-select:focus { border-color: var(--border-active); }
+
+  .btn-bet {
+    width: 100%;
+    padding: 13px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    font-family: 'Oxanium', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(37,99,235,0.3);
+  }
+  .btn-bet:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
+  .btn-bet:active { transform: translateY(0); }
+  .btn-bet:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-pump {
+    width: 100%;
+    padding: 13px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-family: 'Oxanium', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .btn-pump:not(:disabled):hover {
+    border-color: #22c55e;
+    color: #22c55e;
+    background: rgba(34,197,94,0.08);
+  }
+  .btn-pump:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-cashout {
+    width: 100%;
+    padding: 13px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: #fff;
+    font-family: 'Oxanium', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(22,163,74,0.3);
+    display: none;
+  }
+  .btn-cashout:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(22,163,74,0.45); }
+  .btn-cashout:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .profit-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .profit-input-wrap {
+    display: flex;
+    align-items: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+  }
+  .profit-value {
+    font-family: 'Oxanium', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* BALLOON STAGE */
+  .stage {
+    background: linear-gradient(180deg, #0a0f1a 0%, #0d1117 100%);
+    position: relative;
+    overflow: hidden;
+    height: 280px;
+    margin: 0 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  /* Stars */
+  .stars {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 15%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 60%, rgba(255,255,255,0.25) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 40% 70%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 25%, rgba(255,255,255,0.35) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 45%, rgba(255,255,255,0.15) 0%, transparent 100%);
+  }
+
+  /* Submarine */
+  .submarine {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 80px;
+  }
+  .sub-body {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px;
+    height: 50px;
+    background: linear-gradient(135deg, #1e2a3a, #162032);
+    border-radius: 25px;
+    border: 1px solid #2a3a4a;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .sub-tower {
+    position: absolute;
+    bottom: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 32px;
+    background: linear-gradient(135deg, #1e2a3a, #162032);
+    border-radius: 6px 6px 0 0;
+    border: 1px solid #2a3a4a;
+    border-bottom: none;
+  }
+  .sub-pipe {
+    position: absolute;
+    bottom: 76px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 20px;
+    background: linear-gradient(135deg, #243040, #1a2535);
+    border-radius: 3px 3px 0 0;
+    border: 1px solid #2a3a4a;
+    border-bottom: none;
+  }
+  .sub-windows {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 14px;
+  }
+  .sub-window {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #2a4a6a, #0d1f2d);
+    border: 1px solid #2a3a4a;
+    box-shadow: 0 0 6px rgba(37,99,235,0.2);
+  }
+  .sub-propeller {
+    position: absolute;
+    right: 4px;
+    bottom: 14px;
+    width: 20px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sub-propeller svg { animation: spin 2s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* BALLOON */
+  .balloon-wrap {
+    position: absolute;
+    bottom: 76px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 130px;
+    height: 148px;
+    transition: bottom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .balloon-wrap.flying {
+    transition: bottom 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 1s ease;
+  }
+  .balloon-svg {
+    display: block;
+    overflow: visible;
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: width 0.35s cubic-bezier(0.34,1.4,0.64,1), height 0.35s cubic-bezier(0.34,1.4,0.64,1);
+  }
+  .balloon-string {
+    width: 2px;
+    height: 18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+    border-radius: 1px;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .multiplier-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Oxanium', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: 0.5px;
+  }
+
+  /* CASHOUT POPUP */
+  .cashout-popup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: rgba(13,17,23,0.95);
+    border: 2px solid #22c55e;
+    border-radius: 14px;
+    padding: 22px 32px;
+    text-align: center;
+    z-index: 10;
+    box-shadow: 0 0 40px rgba(34,197,94,0.3), 0 20px 40px rgba(0,0,0,0.6);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    min-width: 170px;
+  }
+  .cashout-popup.show { transform: translate(-50%, -50%) scale(1); }
+  .cashout-popup .co-mult {
+    font-family: 'Oxanium', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: #22c55e;
+    text-shadow: 0 0 20px rgba(34,197,94,0.5);
+    letter-spacing: 1px;
+  }
+  .cashout-popup .co-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 10px 0;
+  }
+  .cashout-popup .co-profit {
+    font-family: 'Oxanium', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #22c55e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+  }
+  .cashout-popup .co-profit .tether-icon {
+    width: 18px;
+    height: 18px;
+    background: #26a17b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: #fff;
+  }
+
+  /* POP SCREEN */
+  .pop-screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,10,15,0.85);
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    border-radius: 12px;
+  }
+  .pop-screen.show { opacity: 1; pointer-events: all; }
+  .pop-mult {
+    font-family: 'Oxanium', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    color: #ef4444;
+    text-shadow: 0 0 30px rgba(239,68,68,0.7);
+    letter-spacing: 1px;
+  }
+  .pop-label {
+    font-family: 'Oxanium', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+    margin-top: 4px;
+    letter-spacing: 2px;
+  }
+
+  /* MULTIPLIER TRACK */
+  .mult-track-wrap {
+    padding: 12px 16px 4px;
+    overflow: hidden;
+  }
+  .mult-track {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .mult-track::-webkit-scrollbar { display: none; }
+  .mult-pill {
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: 'Oxanium', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .mult-pill.current {
+    background: var(--accent-green);
+    border-color: var(--accent-green);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(22,163,74,0.4);
+  }
+  .mult-pill.popped {
+    background: var(--accent-red);
+    border-color: var(--accent-red);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(220,38,38,0.4);
+  }
+
+  /* BOTTOM TOOLBAR */
+  .bottom-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .tool-icons { display: flex; gap: 14px; }
+  .tool-icons button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+  .tool-icons button:hover { color: var(--text-secondary); }
+  .bottom-logo {
+    font-family: 'Oxanium', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+  }
+
+  /* Difficulty colors */
+  .diff-easy { --balloon-color: #22c55e; --balloon-glow: rgba(34,197,94,0.25); }
+  .diff-medium { --balloon-color: #3b82f6; --balloon-glow: rgba(59,130,246,0.25); }
+  .diff-hard { --balloon-color: #ef4444; --balloon-glow: rgba(239,68,68,0.25); }
+  .diff-expert { --balloon-color: #a855f7; --balloon-glow: rgba(168,85,247,0.25); }
+
+  .stage { --balloon-color: #3b82f6; --balloon-glow: rgba(59,130,246,0.25); }
+
+  /* Shine on balloon */
+  .balloon-shine { fill: rgba(255,255,255,0.55); }
+
+  /* Particles for pop */
+  .particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particle-fly 0.8s ease-out forwards;
+  }
+  @keyframes particle-fly {
+    0% { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: var(--fly) scale(0); }
+  }
+
+  .separator { width: 1px; height: 16px; background: var(--border); }
+
+  /* Static glow on active balloon — no animation to keep it still */
+  .balloon-active .balloon-svg {
+    filter: drop-shadow(0 0 14px var(--balloon-glow));
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">Raika</div>
+  <div class="topbar-balance">
+    <span class="bal-label">USDT</span>
+    <span class="bal-value" id="balanceDisplay">100.00</span>
+  </div>
+  <button class="fairness-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    Fairness
+  </button>
+</div>
+
+<!-- TAB SWITCH -->
+<div class="tab-switch">
+  <button class="tab-btn active" onclick="setTab('manual', this)">Manual</button>
+  <button class="tab-btn" onclick="setTab('auto', this)">Auto</button>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <!-- Bet Amount -->
+  <div>
+    <div class="field-label">Bet Amount <span id="betUsdt">0.00000000 USDT</span></div>
+    <div class="bet-input-wrap">
+      <span class="currency-icon">$</span>
+      <input type="number" class="bet-input" id="betInput" value="0.00" min="0" step="0.01" oninput="updateBet()">
+      <div class="bet-actions">
+        <button class="bet-action-btn" onclick="halfBet()">½</button>
+        <button class="bet-action-btn" onclick="doubleBet()">2×</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Difficulty -->
+  <div>
+    <div class="field-label">Difficulty</div>
+    <select class="diff-select" id="diffSelect" onchange="changeDiff()">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+      <option value="expert">Expert</option>
+    </select>
+  </div>
+
+  <!-- Bet / Cashout buttons -->
+  <button class="btn-bet" id="betBtn" onclick="placeBet()">Bet</button>
+  <button class="btn-cashout" id="cashoutBtn" onclick="cashOut()">Cashout</button>
+  <button class="btn-pump" id="pumpBtn" onclick="pump()" disabled>Pump</button>
+
+  <!-- Profit -->
+  <div class="profit-row">
+    <div class="field-label">Total Profit (<span id="profitMult">1.00</span>×) <span id="profitUsdt">0.00000000 USDT</span></div>
+    <div class="profit-input-wrap">
+      <span class="currency-icon">$</span>
+      <span class="profit-value" id="profitValue">0.00</span>
+    </div>
+  </div>
+</div>
+
+<!-- STAGE -->
+<div class="stage diff-medium" id="stage">
+  <div class="stars"></div>
+
+  <!-- Submarine -->
+  <div class="submarine">
+    <div class="sub-body">
+      <div class="sub-windows">
+        <div class="sub-window"></div>
+        <div class="sub-window"></div>
+        <div class="sub-window"></div>
+      </div>
+      <div class="sub-propeller">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 4 Q12 10 10 16" stroke="#2a4a6a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M10 4 Q8 10 10 16" stroke="#1e3a5a" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="10" cy="10" r="2.5" fill="#243040"/>
+        </svg>
+      </div>
+    </div>
+    <div class="sub-tower"></div>
+    <div class="sub-pipe"></div>
+  </div>
+
+  <!-- Balloon -->
+  <div class="balloon-wrap" id="balloonWrap">
+    <svg class="balloon-svg" id="balloonSvg" width="110" height="130" viewBox="0 0 110 130">
+      <defs>
+        <radialGradient id="ballGrad" cx="40%" cy="35%" r="60%">
+          <stop offset="0%" stop-color="var(--balloon-color)" stop-opacity="0.95"/>
+          <stop offset="100%" stop-color="var(--balloon-color)" stop-opacity="0.6"/>
+        </radialGradient>
+      </defs>
+      <!-- Balloon body -->
+      <ellipse cx="55" cy="58" rx="48" ry="52" fill="url(#ballGrad)"/>
+      <!-- Shine -->
+      <ellipse cx="43" cy="36" rx="12" ry="9" fill="rgba(255,255,255,0.5)" class="balloon-shine"/>
+      <!-- Knot -->
+      <ellipse cx="55" cy="110" rx="6" ry="5" fill="var(--balloon-color)" opacity="0.8"/>
+      <!-- Multiplier -->
+      <text x="55" y="65" text-anchor="middle" dominant-baseline="middle"
+        font-family="Oxanium, sans-serif" font-size="18" font-weight="800" fill="white">
+        <tspan id="balloonMult">1.00x</tspan>
+      </text>
+    </svg>
+    <div class="balloon-string"></div>
+  </div>
+
+  <!-- Cashout Popup -->
+  <div class="cashout-popup" id="cashoutPopup">
+    <div class="co-mult" id="coMult">1.00×</div>
+    <div class="co-divider"></div>
+    <div class="co-profit">
+      <span class="tether-icon">₮</span>
+      <span id="coProfit">$0.00</span>
+    </div>
+  </div>
+
+  <!-- Pop Screen -->
+  <div class="pop-screen" id="popScreen">
+    <div class="pop-mult" id="popMult">9.08×</div>
+    <div class="pop-label">Pop</div>
+  </div>
+</div>
+
+<!-- MULTIPLIER TRACK -->
+<div class="mult-track-wrap">
+  <div class="mult-track" id="multTrack"></div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="tool-icons">
+    <button title="Settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+    </button>
+    <button title="Layout">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+    </button>
+    <button title="Stats">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </button>
+    <button title="Chart">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+    </button>
+  </div>
+  <div class="bottom-logo">Raika</div>
+</div>
+
+<script>
+// ============ GAME STATE ============
+const DIFFICULTIES = {
+  easy:   { color: '#22c55e', class: 'diff-easy',   multSteps: [1.00,1.02,1.07,1.11,1.17,1.23,1.30,1.38,1.47,1.57,1.68,1.80,1.93], popChance: 0.05 },
+  medium: { color: '#3b82f6', class: 'diff-medium',  multSteps: [1.00,1.11,1.27,1.46,1.69,1.98,2.34,2.80,3.40,4.19,5.24,6.65,8.58], popChance: 0.12 },
+  hard:   { color: '#ef4444', class: 'diff-hard',    multSteps: [1.00,1.23,1.55,1.98,2.56,3.36,4.45,5.95,8.02,10.9,14.9,20.4,28.0], popChance: 0.22 },
+  expert: { color: '#a855f7', class: 'diff-expert',  multSteps: [1.00,1.63,2.80,4.95,9.08,17.3,33.9,67.8,136,274,549,999,1998],    popChance: 0.38 },
+};
+
+let state = {
+  balance: 100.00,
+  betAmount: 0,
+  diff: 'medium',
+  playing: false,
+  pumpIndex: 0,
+  popped: false,
+  cashedOut: false,
+};
+
+// ============ DOM REFS ============
+const stage = document.getElementById('stage');
+const balloonWrap = document.getElementById('balloonWrap');
+const balloonSvg = document.getElementById('balloonSvg');
+const balloonMult = document.getElementById('balloonMult');
+const betBtn = document.getElementById('betBtn');
+const cashoutBtn = document.getElementById('cashoutBtn');
+const pumpBtn = document.getElementById('pumpBtn');
+const cashoutPopup = document.getElementById('cashoutPopup');
+const popScreen = document.getElementById('popScreen');
+const multTrack = document.getElementById('multTrack');
+const balanceDisplay = document.getElementById('balanceDisplay');
+const profitMult = document.getElementById('profitMult');
+const profitValue = document.getElementById('profitValue');
+const profitUsdt = document.getElementById('profitUsdt');
+const betInput = document.getElementById('betInput');
+const diffSelect = document.getElementById('diffSelect');
+
+// ============ INIT ============
+function init() {
+  renderMultTrack();
+  updateBalloonStyle();
+}
+
+function renderMultTrack() {
+  const d = DIFFICULTIES[state.diff];
+  multTrack.innerHTML = '';
+  d.multSteps.forEach((m, i) => {
+    const pill = document.createElement('div');
+    pill.className = 'mult-pill';
+    pill.id = `pill-${i}`;
+    pill.textContent = m >= 100 ? `${m.toFixed(0)}×` : `${m.toFixed(2)}×`;
+    multTrack.appendChild(pill);
+  });
+}
+
+function updateBalloonStyle() {
+  const d = DIFFICULTIES[state.diff];
+  // Update CSS var
+  stage.style.setProperty('--balloon-color', d.color);
+  stage.style.setProperty('--balloon-glow', d.color + '40');
+  // Update gradient
+  const grad = balloonSvg.querySelector('#ballGrad');
+  grad.querySelectorAll('stop')[0].setAttribute('stop-color', d.color);
+  grad.querySelectorAll('stop')[1].setAttribute('stop-color', d.color);
+  // Update knot
+  balloonSvg.querySelector('ellipse:nth-child(3)').setAttribute('fill', d.color);
+}
+
+// ============ CONTROLS ============
+function setTab(tab, el) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function updateBet() {
+  const v = parseFloat(betInput.value) || 0;
+  document.getElementById('betUsdt').textContent = v.toFixed(8) + ' USDT';
+}
+
+function halfBet() {
+  betInput.value = (parseFloat(betInput.value) / 2).toFixed(2);
+  updateBet();
+}
+function doubleBet() {
+  betInput.value = (parseFloat(betInput.value) * 2).toFixed(2);
+  updateBet();
+}
+
+function changeDiff() {
+  state.diff = diffSelect.value;
+  renderMultTrack();
+  updateBalloonStyle();
+}
+
+// ============ GAME LOGIC ============
+function placeBet() {
+  const bet = parseFloat(betInput.value) || 0;
+  if (bet <= 0) { shakeInput(); return; }
+  if (bet > state.balance) { shakeInput(); return; }
+
+  state.betAmount = bet;
+  state.balance -= bet;
+  state.playing = true;
+  state.pumpIndex = 0;
+  state.popped = false;
+  state.cashedOut = false;
+
+  balanceDisplay.textContent = state.balance.toFixed(2);
+  updateDisplay();
+
+  // Reset balloon position
+  balloonWrap.style.bottom = '76px';
+  balloonWrap.style.opacity = '1';
+  balloonWrap.classList.remove('flying');
+  balloonWrap.classList.add('balloon-active');
+  popScreen.classList.remove('show');
+  cashoutPopup.classList.remove('show');
+  resetBalloonSize();
+
+  // First step multiplier
+  const d = DIFFICULTIES[state.diff];
+  const mult = d.multSteps[0];
+  setMult(mult);
+  highlightPill(0);
+
+  betBtn.disabled = true;
+  betBtn.style.display = 'none';
+  // Cashout hidden until first pump
+  cashoutBtn.style.display = 'block';
+  cashoutBtn.disabled = true;
+  pumpBtn.disabled = false;
+  diffSelect.disabled = true;
+  // Lock bet input and half/double buttons
+  betInput.disabled = true;
+  document.querySelectorAll('.bet-action-btn').forEach(b => b.disabled = true);
+}
+
+function pump() {
+  if (!state.playing || state.popped || state.cashedOut) return;
+  const d = DIFFICULTIES[state.diff];
+  const nextIndex = state.pumpIndex + 1;
+  if (nextIndex >= d.multSteps.length) return;
+
+  // Check pop
+  if (Math.random() < d.popChance) {
+    doPop(d.multSteps[nextIndex]);
+    return;
+  }
+
+  state.pumpIndex = nextIndex;
+  const mult = d.multSteps[state.pumpIndex];
+  setMult(mult);
+  highlightPill(state.pumpIndex);
+
+  // Enable cashout after first pump
+  cashoutBtn.disabled = false;
+
+  // Grow balloon by changing SVG width/height (no transform = no position shift)
+  growBalloon(state.pumpIndex, d.multSteps.length);
+
+  updateDisplay();
+}
+
+function cashOut() {
+  if (!state.playing || state.popped || state.cashedOut) return;
+  state.cashedOut = true;
+  const d = DIFFICULTIES[state.diff];
+  const mult = d.multSteps[state.pumpIndex];
+  const profit = state.betAmount * mult;
+
+  state.balance += profit;
+  balanceDisplay.textContent = state.balance.toFixed(2);
+
+  // Show cashout popup
+  document.getElementById('coMult').textContent = mult.toFixed(2) + '×';
+  document.getElementById('coProfit').textContent = '$' + profit.toFixed(2);
+  cashoutPopup.classList.add('show');
+
+  // Fly balloon up
+  balloonWrap.classList.add('flying');
+  balloonWrap.style.bottom = '400px';
+  balloonWrap.style.opacity = '0';
+  balloonWrap.classList.remove('balloon-active');
+
+  endRound();
+
+  // Highlight current pill green
+  highlightPill(state.pumpIndex, 'current');
+
+  setTimeout(() => { cashoutPopup.classList.remove('show'); }, 2500);
+}
+
+function doPop(popMult) {
+  state.popped = true;
+  state.playing = false;
+
+  popScreen.querySelector('.pop-mult').textContent = (popMult >= 100 ? popMult.toFixed(0) : popMult.toFixed(2)) + '×';
+  popScreen.classList.add('show');
+  balloonWrap.classList.remove('balloon-active');
+  balloonWrap.style.opacity = '0';
+
+  // Highlight current pill red
+  const d = DIFFICULTIES[state.diff];
+  const nextIndex = state.pumpIndex + 1;
+  highlightPill(nextIndex, 'popped');
+
+  spawnParticles();
+  endRound();
+
+  setTimeout(() => { popScreen.classList.remove('show'); balloonWrap.style.opacity = '1'; }, 2200);
+}
+
+function endRound() {
+  state.playing = false;
+  pumpBtn.disabled = true;
+  cashoutBtn.style.display = 'none';
+  betBtn.style.display = 'block';
+  betBtn.disabled = false;
+  diffSelect.disabled = false;
+  profitMult.textContent = '1.00';
+  profitValue.textContent = '0.00';
+  profitUsdt.textContent = '0.00000000 USDT';
+
+  // Unlock bet input
+  betInput.disabled = false;
+  document.querySelectorAll('.bet-action-btn').forEach(b => b.disabled = false);
+
+  setTimeout(() => {
+    resetBalloon();
+  }, 2400);
+}
+
+function resetBalloon() {
+  state.pumpIndex = 0;
+  balloonWrap.style.bottom = '76px';
+  balloonWrap.style.opacity = '1';
+  balloonWrap.classList.remove('flying');
+  resetBalloonSize();
+  setMult(1.00);
+  renderMultTrack();
+}
+
+// ============ DISPLAY ============
+function setMult(mult) {
+  const txt = (mult >= 100 ? mult.toFixed(0) : mult.toFixed(2)) + 'x';
+  balloonMult.textContent = txt;
+}
+
+function updateDisplay() {
+  const d = DIFFICULTIES[state.diff];
+  const mult = d.multSteps[state.pumpIndex];
+  const profit = state.betAmount * mult;
+  profitMult.textContent = mult.toFixed(2);
+  profitValue.textContent = profit.toFixed(2);
+  profitUsdt.textContent = profit.toFixed(8) + ' USDT';
+}
+
+function highlightPill(index, type = 'current') {
+  multTrack.querySelectorAll('.mult-pill').forEach(p => {
+    p.classList.remove('current', 'popped');
+  });
+  const pill = document.getElementById(`pill-${index}`);
+  if (pill) {
+    pill.classList.add(type);
+    pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
+}
+
+function growBalloon(index, max) {
+  // Grow SVG width/height so balloon stays anchored at bottom-center
+  const base = 110;
+  const size = base + (index / max) * 54;
+  balloonSvg.setAttribute('width', size);
+  balloonSvg.setAttribute('height', size * (130/110));
+}
+
+function resetBalloonSize() {
+  balloonSvg.setAttribute('width', 110);
+  balloonSvg.setAttribute('height', 130);
+}
+
+function shakeInput() {
+  const wrap = document.querySelector('.bet-input-wrap');
+  wrap.style.borderColor = 'var(--accent-red)';
+  wrap.style.animation = 'shake 0.3s ease';
+  setTimeout(() => {
+    wrap.style.borderColor = '';
+    wrap.style.animation = '';
+  }, 400);
+}
+
+// Particle burst on pop
+function spawnParticles() {
+  const colors = ['#ef4444','#f97316','#fbbf24','#a855f7','#ec4899'];
+  const rect = stage.getBoundingClientRect();
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const angle = (Math.PI * 2 * i) / 18;
+    const dist = 60 + Math.random() * 70;
+    const tx = Math.cos(angle) * dist + 'px';
+    const ty = Math.sin(angle) * dist + 'px';
+    p.style.setProperty('--fly', `translate(${tx}, ${ty})`);
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.left = '50%';
+    p.style.top = '40%';
+    p.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
+    stage.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+  }
+}
+
+// Shake keyframe
+const style = document.createElement('style');
+style.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }`;
+document.head.appendChild(style);
+
+init();
+</script>
+</body>
+</html>

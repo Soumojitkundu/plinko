@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>StakePro — Live Sports Betting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#070d16;--bg2:#0d1623;--bg3:#131f30;--bg4:#192840;--bg5:#1e3050;
+  --accent:#00f5a0;--accent2:#0ea5e9;--accent3:#f59e0b;--accent4:#a855f7;
+  --red:#f43f5e;--green:#10b981;--orange:#f97316;--yellow:#eab308;--blue:#3b82f6;
+  --text:#dde8f5;--text2:#7a9ab8;--text3:#3f5f7a;
+  --border:#142030;--border2:#1e3045;--border3:#284460;
+  --live:#f43f5e;
+  --font:'DM Sans',sans-serif;--fontD:'Barlow Condensed',sans-serif;
+  --glow:rgba(0,245,160,0.12);
+  --r:12px;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border3);border-radius:3px}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:216px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:width .25s;z-index:50}
+.sidebar.mini{width:54px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:54px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;position:relative}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.3}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px}
+
+/* ── SIDEBAR ── */
+.logo{height:54px;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0;overflow:hidden}
+.logo-gfx{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fontD);font-size:15px;font-weight:900;color:#000;letter-spacing:-0.5px;box-shadow:0 0 18px rgba(0,245,160,.35)}
+.logo-name{font-family:var(--fontD);font-weight:800;font-size:21px;letter-spacing:-.5px;white-space:nowrap}
+.logo-name span{color:var(--accent)}
+.sidebar.mini .logo-name,.sidebar.mini .nav-label,.sidebar.mini .nav-section,.sidebar.mini .sidebar-bottom-label{display:none}
+.nav-wrap{flex:1;overflow-y:auto;padding:6px 0}
+.nav-section{padding:10px 14px 3px;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:2px;white-space:nowrap}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;color:var(--text2);border-left:2px solid transparent;transition:all .15s;white-space:nowrap;user-select:none}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:rgba(0,245,160,.06);color:var(--accent);border-left-color:var(--accent)}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.nav-label{font-size:12.5px;font-weight:500}
+.nav-badge{margin-left:auto;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;letter-spacing:.3px}
+.nb-live{background:rgba(244,63,94,.18);color:var(--live);animation:blink 1.8s infinite}
+.nb-count{background:var(--bg4);color:var(--text2)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.sidebar-bottom{border-top:1px solid var(--border);padding:8px 0}
+
+/* ── TOPBAR ── */
+.menu-btn{background:none;border:none;color:var(--text2);cursor:pointer;font-size:20px;padding:2px;flex-shrink:0;transition:color .15s}
+.menu-btn:hover{color:var(--accent)}
+.ticker-wrap{flex:1;overflow:hidden;min-width:0;mask-image:linear-gradient(90deg,transparent,#000 30px,#000 calc(100% - 30px),transparent)}
+.ticker-inner{display:flex;gap:0;white-space:nowrap;animation:scroll-ticker 40s linear infinite}
+.ticker-inner:hover{animation-play-state:paused}
+@keyframes scroll-ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tick-item{display:inline-flex;align-items:center;gap:7px;padding:0 18px;cursor:pointer;border-right:1px solid var(--border2)}
+.tick-live{font-size:8px;font-weight:700;color:var(--live);border:1px solid var(--live);padding:1px 5px;border-radius:3px;letter-spacing:.5px;animation:blink 1.5s infinite}
+.tick-match{font-size:11px;font-weight:500;color:var(--text2)}
+.tick-score{font-family:var(--fontD);font-size:13px;font-weight:700;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:8px}
+.bal-pill{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:5px 12px;cursor:pointer;transition:border-color .15s}
+.bal-pill:hover{border-color:var(--accent)}
+.bal-amt{font-family:var(--fontD);font-size:15px;font-weight:700;color:var(--accent)}
+.bal-lbl{font-size:10px;color:var(--text3);line-height:1}
+
+/* ── API STATUS BAR ── */
+.api-bar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(0,245,160,.03);border-bottom:1px solid var(--border);font-size:10px;color:var(--text3)}
+.api-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.api-dot.connected{background:var(--green);box-shadow:0 0 6px var(--green)}
+.api-dot.error{background:var(--red)}
+.api-dot.loading{background:var(--accent3);animation:blink 1s infinite}
+.api-key-btn{margin-left:auto;padding:3px 9px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);cursor:pointer;font-size:10px;font-weight:600;font-family:var(--font);transition:all .15s}
+.api-key-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── BUTTONS ── */
+.btn{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font);transition:all .15s}
+.btn-accent{background:var(--accent);color:#000}
+.btn-accent:hover{background:#00dfa0;transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,245,160,.3)}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-sm{padding:4px 10px;font-size:11px;border-radius:5px}
+
+/* ── PAGES ── */
+.page{display:none}
+.page.active{display:block;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── GRID LAYOUTS ── */
+.col-layout{display:grid;grid-template-columns:1fr 320px;gap:14px;align-items:start}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.four-col{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* ── CARDS ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.card-hd{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+.card-bd{padding:14px}
+
+/* ── STAT BOXES ── */
+.stat-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.stat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;font-weight:600}
+.stat-val{font-family:var(--fontD);font-size:24px;font-weight:700;line-height:1}
+.stat-note{font-size:10px;color:var(--text3);margin-top:3px}
+
+/* ── LIVE / UPCOMING TAGS ── */
+.ldot{width:6px;height:6px;background:var(--live);border-radius:50%;animation:live-pulse 1.5s infinite;flex-shrink:0}
+@keyframes live-pulse{0%,100%{box-shadow:0 0 0 0 rgba(244,63,94,.5)}50%{box-shadow:0 0 0 5px rgba(244,63,94,0)}}
+.live-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(244,63,94,.13);color:var(--live);font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.5px;border:1px solid rgba(244,63,94,.2)}
+.upcoming-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(14,165,233,.1);color:var(--accent2);font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid rgba(14,165,233,.2)}
+
+/* ── SECTION HEADER ── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sh-title{font-family:var(--fontD);font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;letter-spacing:.3px}
+
+/* ── MATCH CARD ── */
+.match-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:10px;transition:border-color .2s,box-shadow .2s;position:relative;overflow:hidden}
+.match-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,245,160,.15),transparent);pointer-events:none}
+.match-card:hover{border-color:var(--border3);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.match-card.live-card{border-color:rgba(244,63,94,.2)}
+.mc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mc-league{font-size:10px;font-weight:700;color:var(--accent3);letter-spacing:.5px;text-transform:uppercase}
+.mc-venue{font-size:10px;color:var(--text3)}
+.teams-grid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin-bottom:12px}
+.team-side{display:flex;align-items:center;gap:8px}
+.team-side.right{flex-direction:row-reverse}
+.team-logo{border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;color:#fff;letter-spacing:.3px}
+.t-name{font-size:13px;font-weight:600;line-height:1.2}
+.t-score{font-size:11px;color:var(--accent);font-family:var(--fontD);font-weight:700;margin-top:2px}
+.team-info.right{text-align:right}
+.vs-center{background:var(--bg);border:1px solid var(--border2);border-radius:9px;padding:6px 10px;text-align:center;min-width:68px}
+.vs-score-main{font-family:var(--fontD);font-size:16px;font-weight:900;color:var(--text);line-height:1}
+.vs-time{font-size:9px;color:var(--text3);margin-top:2px}
+.vs-label{font-family:var(--fontD);font-size:13px;color:var(--text2);font-weight:600;letter-spacing:1px}
+
+/* ── MARKETS & ODDS ── */
+.markets-wrap{border-top:1px solid var(--border);padding-top:11px}
+.market-row{margin-bottom:9px}
+.mkt-label{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.odds-grid{display:grid;gap:5px}
+.odds-grid.g2{grid-template-columns:1fr 1fr}
+.odds-grid.g3{grid-template-columns:1fr 1fr 1fr}
+.odd-btn{background:var(--bg4);border:1px solid var(--border2);border-radius:8px;padding:8px;cursor:pointer;transition:all .15s;text-align:center;user-select:none;position:relative;overflow:hidden}
+.odd-btn:hover{border-color:rgba(14,165,233,.5);background:rgba(14,165,233,.07)}
+.odd-btn.selected{border-color:var(--accent);background:rgba(0,245,160,.1)}
+.odd-btn.selected .ov{color:var(--accent)}
+.odd-btn.locked{opacity:.45;cursor:not-allowed}
+.on{font-size:9px;color:var(--text3);margin-bottom:2px;font-weight:500}
+.ov{font-family:var(--fontD);font-size:15px;font-weight:700;color:var(--text);transition:color .25s}
+.ov.up{color:var(--green);animation:flash-g .6s}
+.ov.down{color:var(--red);animation:flash-r .6s}
+@keyframes flash-g{0%,100%{color:var(--text)}40%{color:var(--green)}}
+@keyframes flash-r{0%,100%{color:var(--text)}40%{color:var(--red)}}
+
+/* ── BET SLIP ── */
+.betslip{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;position:sticky;top:0}
+.bs-header{padding:11px 14px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.bs-title{font-family:var(--fontD);font-size:16px;font-weight:700;letter-spacing:.3px}
+.bs-count{font-size:10px;color:var(--accent);font-weight:700;background:rgba(0,245,160,.12);padding:2px 8px;border-radius:10px}
+.bs-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)}
+.bs-tab{padding:9px;text-align:center;font-size:11px;font-weight:600;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s;user-select:none}
+.bs-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.bs-empty{padding:20px 16px;text-align:center;color:var(--text3);font-size:12px;line-height:1.7}
+.bs-empty-icon{font-size:28px;margin-bottom:8px;opacity:.4}
+.bs-item{padding:9px 12px;border-bottom:1px solid var(--border);position:relative;animation:slideIn .2s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.bsi-top{display:flex;align-items:start;justify-content:space-between;margin-bottom:2px}
+.bsi-match{font-size:10px;color:var(--text3)}
+.bsi-pick{font-size:12.5px;font-weight:600}
+.bsi-mkt{font-size:10px;color:var(--text2)}
+.bsi-odds{font-family:var(--fontD);font-size:14px;font-weight:700;color:var(--accent)}
+.bs-remove{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:1px;flex-shrink:0;transition:color .15s}
+.bs-remove:hover{color:var(--red)}
+.multi-banner{margin:8px 12px;background:rgba(0,245,160,.06);border:1px solid rgba(0,245,160,.18);border-radius:9px;padding:10px 12px}
+.mb-legs{font-size:9px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
+.mb-odds{font-family:var(--fontD);font-size:18px;font-weight:800;color:var(--accent);line-height:1}
+.stake-section{padding:10px 12px;border-top:1px solid var(--border)}
+.sl{font-size:9px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+.stake-inp{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:8px;font-size:15px;font-weight:700;font-family:var(--fontD);outline:none;transition:border-color .15s}
+.stake-inp:focus{border-color:var(--accent)}
+.qs-row{display:flex;gap:4px;margin-top:6px}
+.qs{flex:1;background:var(--bg4);color:var(--text2);padding:4px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;border:1px solid var(--border);font-family:var(--font)}
+.qs:hover{background:var(--bg5);color:var(--accent);border-color:rgba(0,245,160,.2)}
+.payout-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-top:1px solid var(--border);background:rgba(0,245,160,.03)}
+.pr-lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.pr-odds{font-family:var(--fontD);font-size:14px;font-weight:700;color:var(--accent2)}
+.pr-val{font-family:var(--fontD);font-size:20px;font-weight:800;color:var(--green);line-height:1}
+.place-btn{width:calc(100% - 24px);margin:8px 12px 12px;padding:13px;background:linear-gradient(135deg,var(--accent),#00c990);color:#000;border:none;border-radius:9px;font-size:15px;font-weight:800;cursor:pointer;font-family:var(--fontD);letter-spacing:.5px;transition:all .15s;box-shadow:0 4px 18px rgba(0,245,160,.2)}
+.place-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,245,160,.35)}
+.place-btn:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;box-shadow:none}
+
+/* ── PREDICTION BAR ── */
+.pred-wrap{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-top:10px}
+.pred-title{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.pred-item{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.pred-name{font-size:11px;font-weight:500;min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2)}
+.pred-prob{flex:1;display:flex;align-items:center;gap:6px}
+.pred-bar{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.pred-bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.pred-pct{font-family:var(--fontD);font-size:12px;font-weight:700;min-width:32px;text-align:right}
+.pred-odd{font-family:var(--fontD);font-size:12px;font-weight:700;color:var(--text2);min-width:34px;text-align:right}
+
+/* ── LIVE FEED ── */
+.feed-wrap{max-height:240px;overflow-y:auto}
+.feed-item{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border);animation:fadeUp .35s ease}
+.fi-av{width:26px;height:26px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--accent2);flex-shrink:0}
+.fi-name{font-size:12px;font-weight:600;color:var(--text)}
+.fi-detail{font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi-amt{font-family:var(--fontD);font-size:13px;font-weight:700;margin-left:auto;flex-shrink:0}
+
+/* ── TABLES ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);background:var(--bg3);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.012)}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;white-space:nowrap;letter-spacing:.3px}
+.bg-green{background:rgba(16,185,129,.15);color:#10b981}
+.bg-red{background:rgba(244,63,94,.15);color:#f43f5e}
+.bg-orange{background:rgba(249,115,22,.15);color:#f97316}
+.bg-blue{background:rgba(59,130,246,.15);color:#3b82f6}
+.bg-gray{background:rgba(139,165,192,.1);color:var(--text2)}
+.bg-gold{background:rgba(245,158,11,.15);color:#f59e0b}
+.bg-purple{background:rgba(168,85,247,.15);color:#a855f7}
+
+/* ── FORMS ── */
+.fg{margin-bottom:12px}
+.fl{font-size:9px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;display:block}
+.fi{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-size:13px;font-family:var(--font);outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--accent)}
+.fs{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:7px;font-size:13px;font-family:var(--font);outline:none;appearance:none}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* ── TOGGLE ── */
+.tog{position:relative;width:38px;height:21px;display:inline-block;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tog-sl{position:absolute;inset:0;background:var(--bg4);border:1px solid var(--border2);border-radius:11px;cursor:pointer;transition:.2s}
+.tog-sl:before{content:'';position:absolute;width:15px;height:15px;left:2px;top:2px;background:var(--text3);border-radius:50%;transition:.2s}
+.tog input:checked+.tog-sl{background:rgba(0,245,160,.2);border-color:var(--accent)}
+.tog input:checked+.tog-sl:before{transform:translateX(17px);background:var(--accent)}
+
+/* ── PROGRESS BAR ── */
+.prog{flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .5s ease;min-width:3px}
+
+/* ── MODALS ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:fadeUp .2s ease}
+.modal-hd{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:var(--fontD);font-size:18px;font-weight:700}
+.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:20px;padding:2px;transition:color .15s}
+.modal-close:hover{color:var(--red)}
+.modal-bd{padding:18px}
+.modal-ft{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* ── TOAST ── */
+#toastContainer{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{display:flex;align-items:start;gap:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;min-width:220px;max-width:300px;animation:slideIn .25s ease;box-shadow:0 8px 24px rgba(0,0,0,.4);transition:all .3s}
+.toast.win{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.08)}
+.toast.loss{border-color:rgba(244,63,94,.35);background:rgba(244,63,94,.07)}
+.toast.warn{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.06)}
+.t-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.t-t{font-size:13px;font-weight:600;color:var(--text);line-height:1.2}
+.t-s{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* ── NO MATCHES ── */
+.no-matches{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:40px;text-align:center;color:var(--text3)}
+.no-matches-icon{font-size:36px;margin-bottom:10px;opacity:.4}
+
+/* ── FILTER CHIPS ── */
+.filter-chips{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);transition:all .15s;user-select:none}
+.chip:hover,.chip.active{border-color:var(--accent);background:rgba(0,245,160,.08);color:var(--accent)}
+
+/* ── SPORT FILTER PILLS ── */
+.sport-pills{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.sport-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);transition:all .15s;white-space:nowrap;user-select:none;flex-shrink:0}
+.sport-pill:hover,.sport-pill.active{border-color:var(--accent);background:rgba(0,245,160,.08);color:var(--accent)}
+
+/* ── API PROVIDERS ── */
+.api-providers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.api-provider{background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:10px 12px;cursor:pointer;transition:all .15s}
+.api-provider:hover{border-color:var(--border3)}
+.api-provider.active{border-color:rgba(0,245,160,.35);background:rgba(0,245,160,.04)}
+.api-provider-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
+.api-provider-info{font-size:10px;color:var(--text3);line-height:1.4}
+
+/* ── POINTS TABLE ── */
+.pts-row{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border);transition:background .15s}
+.pts-row:hover{background:rgba(255,255,255,.012)}
+.pts-pos{font-family:var(--fontD);font-size:14px;font-weight:700;color:var(--text3);width:16px;flex-shrink:0}
+.pts-pos.qualify{color:var(--accent)}
+.pts-team-logo{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;flex-shrink:0}
+.pts-name{flex:1;font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pts-val{font-family:var(--fontD);font-size:13px;font-weight:700;min-width:26px;text-align:right}
+.pts-nrr{font-size:10px;min-width:44px;text-align:right}
+
+/* ── MOBILE ── */
+@media(max-width:900px){
+  .col-layout{grid-template-columns:1fr}
+  .two-col{grid-template-columns:1fr}
+  .four-col{grid-template-columns:repeat(2,1fr)}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .api-providers{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .sidebar{position:fixed;left:-216px;height:100%;transition:left .25s}
+  .sidebar.open{left:0;box-shadow:10px 0 30px rgba(0,0,0,.5)}
+  .three-col{grid-template-columns:1fr 1fr}
+  .form-row3{grid-template-columns:1fr 1fr}
+}
+
+/* ── WALLET PAGE ── */
+.wallet-card{background:linear-gradient(135deg,rgba(0,245,160,.08),rgba(14,165,233,.06));border:1px solid rgba(0,245,160,.18);border-radius:14px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
+.wallet-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(0,245,160,.12),transparent 70%);pointer-events:none}
+.wallet-bal-lbl{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.wallet-bal-val{font-family:var(--fontD);font-size:40px;font-weight:900;color:var(--accent);line-height:1}
+
+/* ── HOME HERO ── */
+.home-hero{background:linear-gradient(135deg,rgba(0,245,160,.06) 0%,rgba(14,165,233,.04) 50%,transparent 100%);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
+.home-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent4));opacity:.6}
+.hero-title{font-family:var(--fontD);font-size:28px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px}
+.hero-title span{color:var(--accent)}
+.hero-sub{color:var(--text2);font-size:13px;margin-bottom:14px}
+
+/* ── QUICK STATS BAR ── */
+.quick-stats{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;margin-bottom:14px}
+.qs-stat{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:8px 14px;white-space:nowrap;flex-shrink:0}
+.qs-stat-lbl{font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.qs-stat-val{font-family:var(--fontD);font-size:16px;font-weight:700;line-height:1.2}
+
+/* ── ADMIN: RISK BAR ── */
+.risk-bar{margin-top:6px;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.risk-fill{height:100%;border-radius:3px;transition:width .4s}
+
+/* ── SPORT PAGE TABS ── */
+.sport-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px}
+.sport-tab{padding:9px 16px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s;user-select:none}
+.sport-tab:hover{color:var(--text)}
+.sport-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ── SEARCH BAR ── */
+.search-wrap{position:relative;margin-bottom:12px}
+.search-inp{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px 12px 8px 36px;border-radius:9px;font-size:12px;font-family:var(--font);outline:none;transition:border-color .15s}
+.search-inp:focus{border-color:var(--accent)}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
+
+/* ── ADMIN USER TABLE ── */
+.user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent4));display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;margin-right:6px}
+
+/* ── INLINE BALANCE ADJUST ── */
+.bal-adjust{display:inline-flex;align-items:center;gap:4px}
+.ba-btn{background:var(--bg4);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer;font-size:10px;padding:2px 6px;font-family:var(--font);transition:all .15s}
+.ba-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── RULEBOOK BUTTON & PANEL ── */
+#rulebookBtn{position:fixed;bottom:24px;right:24px;z-index:1000;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(0,245,160,.4);transition:all .2s;color:#000;font-family:var(--fontD);font-weight:800}
+#rulebookBtn:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(0,245,160,.55)}
+#rulebookBtn .rb-tooltip{position:absolute;right:60px;background:var(--bg3);color:var(--text);font-size:11px;font-weight:600;padding:5px 10px;border-radius:7px;white-space:nowrap;border:1px solid var(--border2);opacity:0;pointer-events:none;transition:opacity .2s;font-family:var(--font)}
+#rulebookBtn:hover .rb-tooltip{opacity:1}
+#rulebookPanel{position:fixed;bottom:88px;right:24px;z-index:999;width:360px;max-height:70vh;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.6);display:none;flex-direction:column;overflow:hidden;animation:fadeUp .2s ease}
+#rulebookPanel.open{display:flex}
+.rb-header{padding:13px 16px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.rb-title{font-family:var(--fontD);font-size:15px;font-weight:800;letter-spacing:.3px;display:flex;align-items:center;gap:7px}
+.rb-title span{color:var(--accent)}
+.rb-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;transition:color .15s;padding:2px}
+.rb-close:hover{color:var(--red)}
+.rb-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
+.rb-tab{flex:1;padding:8px 4px;text-align:center;font-size:11px;font-weight:700;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;transition:all .15s;user-select:none}
+.rb-tab:hover{color:var(--text)}
+.rb-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(0,245,160,.04)}
+.rb-body{flex:1;overflow-y:auto;padding:14px}
+.rb-sport-panel{display:none}
+.rb-sport-panel.active{display:block}
+.rb-section{margin-bottom:13px}
+.rb-sec-title{font-size:9px;font-weight:800;color:var(--accent3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.rb-rule{display:flex;gap:8px;margin-bottom:6px;align-items:start}
+.rb-rule-icon{width:16px;height:16px;border-radius:50%;background:rgba(0,245,160,.12);border:1px solid rgba(0,245,160,.25);display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;margin-top:1px}
+.rb-rule-text{font-size:11px;color:var(--text2);line-height:1.55}
+.rb-rule-text b{color:var(--text);font-weight:600}
+.rb-badge-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.rb-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.3px}
+.rb-badge.void{background:rgba(244,63,94,.15);color:var(--red)}
+.rb-badge.stand{background:rgba(16,185,129,.15);color:var(--green)}
+.rb-badge.suspended{background:rgba(245,158,11,.13);color:var(--accent3)}
+.rb-divider{height:1px;background:var(--border);margin:10px 0}
+.rb-footer{padding:9px 14px;border-top:1px solid var(--border);flex-shrink:0;text-align:center}
+.rb-footer a{font-size:10px;color:var(--accent2);text-decoration:none;font-weight:600}
+.rb-footer a:hover{text-decoration:underline}
+@media(max-width:500px){
+  #rulebookPanel{width:calc(100vw - 32px);right:16px;bottom:80px}
+  #rulebookBtn{bottom:16px;right:16px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-gfx">SP</div>
+      <div class="logo-name">Stake<span>Pro</span></div>
+    </div>
+    <div class="nav-wrap">
+      <div class="nav-section">Main</div>
+      <div class="nav-item active" onclick="navTo('live',this)" id="nav-live">
+        <span class="nav-icon">📡</span><span class="nav-label">Live</span>
+        <span class="nav-badge nb-live" id="liveCountBadge">0 LIVE</span>
+      </div>
+      <div class="nav-item" onclick="navTo('upcoming',this)">
+        <span class="nav-icon">📅</span><span class="nav-label">Upcoming</span>
+      </div>
+      <div class="nav-item" onclick="navTo('results',this)">
+        <span class="nav-icon">📊</span><span class="nav-label">Results</span>
+      </div>
+      <div class="nav-section">Sports</div>
+      <div class="nav-item" onclick="navTo('cricket',this)">
+        <span class="nav-icon">🏏</span><span class="nav-label">Cricket</span>
+        <span class="nav-badge nb-count" id="cricketBadge">0</span>
+      </div>
+      <div class="nav-item" onclick="navTo('football',this)">
+        <span class="nav-icon">⚽</span><span class="nav-label">Football</span>
+        <span class="nav-badge nb-count" id="footballBadge">0</span>
+      </div>
+      <div class="nav-item" onclick="navTo('tennis',this)">
+        <span class="nav-icon">🎾</span><span class="nav-label">Tennis</span>
+        <span class="nav-badge nb-count" id="tennisBadge">0</span>
+      </div>
+      <div class="nav-item" onclick="navTo('basketball',this)">
+        <span class="nav-icon">🏀</span><span class="nav-label">Basketball</span>
+        <span class="nav-badge nb-count">2</span>
+      </div>
+      <div class="nav-section">Account</div>
+      <div class="nav-item" onclick="navTo('myBets',this)">
+        <span class="nav-icon">🎫</span><span class="nav-label">My Bets</span>
+      </div>
+      <div class="nav-item" onclick="navTo('wallet',this)">
+        <span class="nav-icon">💰</span><span class="nav-label">Wallet</span>
+      </div>
+      <div class="nav-item" onclick="navTo('profile',this)">
+        <span class="nav-icon">👤</span><span class="nav-label">Profile</span>
+      </div>
+      <div class="nav-section" id="adminNavSection" style="display:none">Admin</div>
+      <div id="adminNavItems" style="display:none">
+        <div class="nav-item" onclick="navTo('adminDash',this)">
+          <span class="nav-icon">⚙️</span><span class="nav-label">Dashboard</span>
+        </div>
+        <div class="nav-item" onclick="navTo('adminMatches',this)">
+          <span class="nav-icon">📋</span><span class="nav-label">Matches</span>
+        </div>
+        <div class="nav-item" onclick="navTo('adminUsers',this)">
+          <span class="nav-icon">👥</span><span class="nav-label">Users</span>
+        </div>
+        <div class="nav-item" onclick="navTo('adminSettle',this)">
+          <span class="nav-icon">💵</span><span class="nav-label">Settle</span>
+        </div>
+        <div class="nav-item" onclick="navTo('apiConfig',this)">
+          <span class="nav-icon">🔌</span><span class="nav-label">API Config</span>
+        </div>
+      </div>
+      <!-- Admin Lock Button -->
+      <div class="nav-item" id="adminLockBtn" onclick="openAdminLogin()">
+        <span class="nav-icon">🔒</span><span class="nav-label">Admin</span>
+      </div>
+    </div>
+    <div class="sidebar-bottom" id="addFundsBottom" style="display:none">
+      <div class="nav-item" onclick="openModal('depositModal')">
+        <span class="nav-icon">➕</span><span class="nav-label sidebar-bottom-label">Add Funds</span>
+      </div>
+    </div>
+    <div class="sidebar-bottom" id="addFundsBottomHidden" style="display:block">
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="ticker-wrap"><div class="ticker-inner" id="tickerInner"></div></div>
+      <div class="topbar-right">
+        <div class="bal-pill" onclick="navTo('wallet',null)">
+          <div>
+            <div class="bal-lbl">Balance</div>
+            <div class="bal-amt" id="headerBal">1,000.00</div>
+          </div>
+        </div>
+        <button class="btn btn-accent btn-sm" onclick="openModal('depositModal')">+ Deposit</button>
+      </div>
+    </div>
+
+    <!-- API STATUS BAR -->
+    <div class="api-bar">
+      <div class="api-dot loading" id="apiDot"></div>
+      <span id="apiStatusText" style="font-weight:600">Initializing...</span>
+      <span id="apiQuota" style="margin-left:auto;margin-right:6px;font-size:10px;color:var(--text3)"></span><button class="api-key-btn" onclick="navTo('apiConfig',null)">⚙ API Config</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ── LIVE PAGE ── -->
+      <div class="page active" id="pg-live">
+        <div class="home-hero">
+          <div class="hero-title">Live <span>Sports</span> Betting</div>
+          <div class="hero-sub">Real-time odds • Instant settlements • Best markets</div>
+          <div class="sport-pills">
+            <div class="sport-pill active" onclick="filterLiveSport('all',this)">🌍 All</div>
+            <div class="sport-pill" onclick="filterLiveSport('cricket',this)">🏏 Cricket</div>
+            <div class="sport-pill" onclick="filterLiveSport('football',this)">⚽ Football</div>
+            <div class="sport-pill" onclick="filterLiveSport('tennis',this)">🎾 Tennis</div>
+          </div>
+        </div>
+        <div class="col-layout">
+          <div>
+            <div class="sh"><div class="sh-title"><div class="ldot"></div>Live Now</div></div>
+            <div id="liveMatchContainer"><div class="no-matches"><div class="no-matches-icon">📡</div>Loading live matches...</div></div>
+            <div class="sh" style="margin-top:18px"><div class="sh-title">📅 Upcoming</div></div>
+            <div id="upcomingMatchContainer"><div class="no-matches"><div class="no-matches-icon">📅</div>Loading upcoming matches...</div></div>
+          </div>
+          <div>
+            <div id="betSlipContainer"></div>
+            <div class="card" style="margin-top:12px">
+              <div class="card-hd"><div class="card-title">🔴 Live Bets Feed</div><span class="badge bg-red">LIVE</span></div>
+              <div class="feed-wrap" id="liveFeed"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── UPCOMING PAGE ── -->
+      <div class="page" id="pg-upcoming">
+        <div class="sh"><div class="sh-title">📅 Upcoming Matches</div></div>
+        <div class="sport-pills">
+          <div class="sport-pill active" onclick="filterUpcomingSport('all',this)">🌍 All</div>
+          <div class="sport-pill" onclick="filterUpcomingSport('cricket',this)">🏏 Cricket</div>
+          <div class="sport-pill" onclick="filterUpcomingSport('football',this)">⚽ Football</div>
+          <div class="sport-pill" onclick="filterUpcomingSport('tennis',this)">🎾 Tennis</div>
+        </div>
+        <div class="col-layout">
+          <div id="upcomingPageContainer"></div>
+          <div id="betSlipContainerUpcoming"></div>
+        </div>
+      </div>
+
+      <!-- ── CRICKET PAGE ── -->
+      <div class="page" id="pg-cricket">
+        <div class="sh"><div class="sh-title">🏏 Cricket</div></div>
+        <div class="col-layout">
+          <div>
+            <div id="cricketContainer"></div>
+          </div>
+          <div>
+            <div id="betSlipContainer2"></div>
+            <div class="card" style="margin-top:12px">
+              <div class="card-hd"><div class="card-title">🏆 IPL 2026 Points Table</div></div>
+              <div id="iplPoints"></div>
+              <div style="padding:6px 12px;font-size:9px;color:var(--text3)">Top 4 qualify for playoffs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FOOTBALL PAGE ── -->
+      <div class="page" id="pg-football">
+        <div class="sh"><div class="sh-title">⚽ Football</div></div>
+        <div class="col-layout">
+          <div id="footballContainer"></div>
+          <div id="betSlipContainer3"></div>
+        </div>
+      </div>
+
+      <!-- ── TENNIS PAGE ── -->
+      <div class="page" id="pg-tennis">
+        <div class="sh"><div class="sh-title">🎾 Tennis</div></div>
+        <div class="col-layout">
+          <div id="tennisContainer"></div>
+          <div id="betSlipContainer4"></div>
+        </div>
+      </div>
+
+      <!-- ── BASKETBALL PAGE ── -->
+      <div class="page" id="pg-basketball">
+        <div class="sh"><div class="sh-title">🏀 Basketball</div></div>
+        <div class="col-layout">
+          <div id="basketballContainer"></div>
+          <div id="betSlipContainer5"></div>
+        </div>
+      </div>
+
+      <!-- ── MY BETS PAGE ── -->
+      <div class="page" id="pg-myBets">
+        <div class="sh">
+          <div class="sh-title">🎫 My Bets</div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-outline btn-sm active" onclick="filterMyBets('all',this)">All</button>
+            <button class="btn btn-outline btn-sm" onclick="filterMyBets('won',this)">Won</button>
+            <button class="btn btn-outline btn-sm" onclick="filterMyBets('lost',this)">Lost</button>
+            <button class="btn btn-outline btn-sm" onclick="filterMyBets('pending',this)">Pending</button>
+          </div>
+        </div>
+        <div class="four-col" style="margin-bottom:14px">
+          <div class="stat-box"><div class="stat-lbl">Total Bets</div><div class="stat-val" id="mbTotal">0</div></div>
+          <div class="stat-box"><div class="stat-lbl">Wagered</div><div class="stat-val" style="color:var(--accent2)" id="mbWagered">₹0</div></div>
+          <div class="stat-box"><div class="stat-lbl">Won</div><div class="stat-val" style="color:var(--green)" id="mbWon">₹0</div></div>
+          <div class="stat-box"><div class="stat-lbl">Net P&L</div><div class="stat-val" id="mbPL">₹0</div></div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Time</th><th>Sport</th><th>Match</th><th>Bet</th><th>Market</th><th>Stake</th><th>Odds</th><th>Result</th><th>Status</th></tr></thead>
+              <tbody id="myBetsTable"><tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text3)">No bets yet — place a bet to get started</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RESULTS PAGE ── -->
+      <div class="page" id="pg-results">
+        <div class="sh"><div class="sh-title">📊 Match Results</div></div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Match</th><th>League</th><th>Sport</th><th>Score</th><th>Result</th></tr></thead>
+              <tbody id="resultsTable"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3)">No results yet</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── WALLET PAGE ── -->
+      <div class="page" id="pg-wallet">
+        <div class="sh"><div class="sh-title">💰 Wallet</div></div>
+        <div class="wallet-card">
+          <div class="wallet-bal-lbl">Available Balance</div>
+          <div class="wallet-bal-val" id="walletBal">₹1,000.00</div>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn btn-accent" onclick="openModal('depositModal')">+ Add Funds</button>
+            <button class="btn btn-outline" onclick="openModal('withdrawModal')">Withdraw</button>
+          </div>
+        </div>
+        <div class="two-col" style="margin-bottom:14px">
+          <div class="stat-box"><div class="stat-lbl">Total Wagered</div><div class="stat-val" style="color:var(--accent2)" id="wWag">₹0</div></div>
+          <div class="stat-box"><div class="stat-lbl">Total Won</div><div class="stat-val" style="color:var(--green)" id="wWon">₹0</div></div>
+          <div class="stat-box"><div class="stat-lbl">Total Bets</div><div class="stat-val" id="wBets">0</div></div>
+          <div class="stat-box"><div class="stat-lbl">P&L vs Start</div><div class="stat-val" id="wPL">₹0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Transaction History</div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Time</th><th>Type</th><th>Description</th><th>Amount</th><th>Balance</th></tr></thead>
+              <tbody id="txTable"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3)">No transactions yet</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROFILE PAGE ── -->
+      <div class="page" id="pg-profile">
+        <div class="sh"><div class="sh-title">👤 Profile</div></div>
+        <div class="two-col" style="align-items:start">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Account Details</div></div>
+            <div class="card-bd">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+                <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:var(--fontD);font-size:24px;font-weight:800;color:#000">U</div>
+                <div>
+                  <div style="font-size:16px;font-weight:700">User</div>
+                  <div style="font-size:12px;color:var(--text2)">@stakepro_user</div>
+                  <div style="margin-top:4px"><span class="badge bg-green">Active</span></div>
+                </div>
+              </div>
+              <div class="fg"><label class="fl">Username</label><input class="fi" type="text" value="" placeholder="Enter username"></div>
+              <div class="fg"><label class="fl">Email</label><input class="fi" type="email" placeholder="Not linked"></div>
+              <div class="fg"><label class="fl">Telegram ID</label><input class="fi" type="text" placeholder="Link Telegram account"></div>
+              <button class="btn btn-accent" style="width:100%">Save Changes</button>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:12px">
+              <div class="card-hd"><div class="card-title">Betting Stats</div></div>
+              <div class="card-bd">
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Win Rate</span><span id="profileWR" style="font-weight:700;color:var(--accent)">--%</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total Bets</span><span id="profileBets" style="font-weight:700">0</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Biggest Win</span><span id="profileBigWin" style="font-weight:700;color:var(--green)">₹0</span></div>
+                  <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Favourite Sport</span><span style="font-weight:700">🏏 Cricket</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div class="card-title">Preferences</div></div>
+              <div class="card-bd">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                  <div><div style="font-size:13px;font-weight:500">Odds Change Alerts</div><div style="font-size:10px;color:var(--text3)">Flash green/red on updates</div></div>
+                  <label class="tog"><input type="checkbox" checked><span class="tog-sl"></span></label>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                  <div><div style="font-size:13px;font-weight:500">Sound Effects</div><div style="font-size:10px;color:var(--text3)">Bet placement sounds</div></div>
+                  <label class="tog"><input type="checkbox"><span class="tog-sl"></span></label>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div><div style="font-size:13px;font-weight:500">Auto-settle Bets</div><div style="font-size:10px;color:var(--text3)">Instant result simulation</div></div>
+                  <label class="tog"><input type="checkbox" checked><span class="tog-sl"></span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADMIN DASHBOARD ── -->
+      <div class="page" id="pg-adminDash">
+        <div class="sh"><div class="sh-title">⚙️ Admin Dashboard</div></div>
+        <div class="four-col" style="margin-bottom:14px">
+          <div class="stat-box"><div class="stat-lbl">House Profit</div><div class="stat-val" style="color:var(--accent)" id="adProfit">₹0</div><div class="stat-note">5% edge</div></div>
+          <div class="stat-box"><div class="stat-lbl">Total Volume</div><div class="stat-val" id="adVolume">₹0</div></div>
+          <div class="stat-box"><div class="stat-lbl">Total Bets</div><div class="stat-val" id="adBets">0</div><div class="stat-note" id="adWL">0W / 0L</div></div>
+          <div class="stat-box"><div class="stat-lbl">Active Users</div><div class="stat-val">1,284</div><div class="stat-note">342 online</div></div>
+        </div>
+        <div class="two-col" style="align-items:start;margin-bottom:12px">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Recent Bets</div></div>
+            <div class="tbl-wrap">
+              <table><thead><tr><th>User</th><th>Match</th><th>Stake</th><th>Odds</th><th>Status</th></tr></thead>
+              <tbody id="adBetTable"><tr><td colspan="5" style="text-align:center;padding:18px;color:var(--text3)">No bets yet</td></tr></tbody></table>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:10px">
+              <div class="card-hd"><div class="card-title">Live Events</div></div>
+              <div class="card-bd">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="display:flex;align-items:center;gap:8px"><span>🏏 Cricket</span><div class="prog" style="flex:1"><div class="prog-fill" style="background:var(--orange)" id="progCricket"></div></div><span class="stat-val" style="font-size:13px" id="progCricketNum">0</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><span>⚽ Football</span><div class="prog" style="flex:1"><div class="prog-fill" style="background:var(--green)" id="progFootball"></div></div><span class="stat-val" style="font-size:13px" id="progFootballNum">0</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><span>🎾 Tennis</span><div class="prog" style="flex:1"><div class="prog-fill" style="background:var(--accent2)" id="progTennis"></div></div><span class="stat-val" style="font-size:13px" id="progTennisNum">0</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-hd"><div class="card-title">🏆 IPL Points Table</div></div>
+              <div id="iplPointsAdmin"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-title">Betting Limits</div><span style="font-size:10px;color:var(--text3)">Global settings</span></div>
+          <div class="card-bd">
+            <div class="form-row">
+              <div class="fg"><label class="fl">Min Bet (₹)</label><input class="fi" type="number" id="minBetInput" value="10" min="1"></div>
+              <div class="fg"><label class="fl">Max Bet (₹)</label><input class="fi" type="number" id="maxBetInput" value="50000"></div>
+              <div class="fg"><label class="fl">Max Payout (₹)</label><input class="fi" type="number" value="500000"></div>
+              <div class="fg"><label class="fl">House Edge (%)</label><input class="fi" type="number" value="5" min="0" max="20"></div>
+            </div>
+            <button class="btn btn-accent btn-sm">Save Limits</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADMIN MATCHES ── -->
+      <div class="page" id="pg-adminMatches">
+        <div class="sh">
+          <div class="sh-title">📋 Match Management</div>
+          <button class="btn btn-accent btn-sm" onclick="openModal('addMatchModal')">+ Add Match</button>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Sport</th><th>Match</th><th>League</th><th>Time</th><th>W1 Odds</th><th>Draw</th><th>W2 Odds</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="adMatchTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADMIN USERS ── -->
+      <div class="page" id="pg-adminUsers">
+        <div class="sh">
+          <div class="sh-title">👥 User Management</div>
+          <div class="search-wrap" style="width:220px;margin-bottom:0">
+            <span class="search-icon">🔍</span>
+            <input class="search-inp" type="text" placeholder="Search users...">
+          </div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>User</th><th>Balance</th><th>Total Bets</th><th>Wagered</th><th>Won</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="adminUserTable">
+                <tr>
+                  <td><span class="user-avatar">U</span>User</td>
+                  <td id="auBal">₹1,000.00</td>
+                  <td id="auBets">0</td>
+                  <td id="auWagered">₹0</td>
+                  <td id="auWon">₹0</td>
+                  <td><span class="badge bg-green">Active</span></td>
+                  <td>
+                    <div class="bal-adjust">
+                      <button class="ba-btn" onclick="adminAdjustBal(100)">+₹100</button>
+                      <button class="ba-btn" onclick="adminAdjustBal(-100)">-₹100</button>
+                      <button class="ba-btn" style="color:var(--red);border-color:rgba(244,63,94,.3)" onclick="adminBanUser()">Ban</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADMIN SETTLE ── -->
+      <div class="page" id="pg-adminSettle">
+        <div class="sh">
+          <div class="sh-title">💵 Bet Settlements</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-outline btn-sm active" onclick="filterSettle('pending',this)" id="sfPending">⏳ Pending</button>
+            <button class="btn btn-outline btn-sm" onclick="filterSettle('all',this)">All</button>
+          </div>
+        </div>
+        <div class="four-col" style="margin-bottom:14px">
+          <div class="stat-box"><div class="stat-lbl">Pending Bets</div><div class="stat-val" style="color:var(--accent3)" id="settlePendingCount">0</div></div>
+          <div class="stat-box"><div class="stat-lbl">Total Staked</div><div class="stat-val" style="color:var(--accent2)" id="settleTotalStaked">₹0</div></div>
+          <div class="stat-box"><div class="stat-lbl">Settled Won</div><div class="stat-val" style="color:var(--green)" id="settleWonCount">0</div></div>
+          <div class="stat-box"><div class="stat-lbl">Settled Lost</div><div class="stat-val" style="color:var(--red)" id="settleLostCount">0</div></div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Bet ID</th><th>Time</th><th>Match</th><th>Pick</th><th>Market</th><th>Stake</th><th>Odds</th><th>Payout</th><th>Status</th><th style="min-width:160px">Action</th></tr></thead>
+              <tbody id="adSettleTable"><tr><td colspan="10" style="text-align:center;padding:18px;color:var(--text3)">No bets yet</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── API CONFIG ── -->
+      <div class="page" id="pg-apiConfig">
+        <div class="sh"><div class="sh-title">🔌 Live Data API Configuration</div></div>
+        <div class="two-col" style="align-items:start">
+          <div>
+            <div class="card" style="margin-bottom:12px">
+              <div class="card-hd"><div class="card-title">Select Data Provider</div></div>
+              <div class="card-bd">
+                <div class="api-providers">
+                  <div class="api-provider active" id="prov-oddsapi" onclick="selectProvider('oddsapi')">
+                    <div class="api-provider-name">The Odds API</div>
+                    <div class="api-provider-info">Live odds &amp; scores · Free tier available</div>
+                  </div>
+                  <div class="api-provider" id="prov-sportsdb" onclick="selectProvider('sportsdb')">
+                    <div class="api-provider-name">TheSportsDB</div>
+                    <div class="api-provider-info">Match data &amp; scores · Free API</div>
+                  </div>
+
+                </div>
+                <div id="apiKeySection">
+                  <div class="fg"><label class="fl">API Key</label><input class="fi" type="text" id="apiKeyInput" placeholder="Enter your API key..."></div>
+                  <div class="fg"><label class="fl">Sports to fetch</label>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+                      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" checked id="fetchCricket"> 🏏 Cricket</label>
+                      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" checked id="fetchFootball"> ⚽ Football</label>
+                      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" checked id="fetchTennis"> 🎾 Tennis</label>
+                    </div>
+                  </div>
+                  <div class="fg"><label class="fl">Refresh Interval</label>
+                    <select class="fs" id="refreshInterval">
+                      <option value="15" selected>15 seconds</option>
+                      <option value="30">30 seconds</option>
+                      <option value="60">1 minute</option>
+                    </select>
+                  </div>
+                  <button class="btn btn-accent" style="width:100%;padding:11px" onclick="saveApiConfig()">Connect &amp; Fetch Live Data</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><div class="card-title">Connection Status</div></div>
+            <div class="card-bd" style="display:flex;flex-direction:column;gap:10px;font-size:12px">
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Provider</span><span id="statusProvider" style="font-weight:600">The Odds API</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Status</span><span id="statusState" class="badge bg-orange">Connecting...</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Last Updated</span><span id="statusLastUpdate" style="font-weight:600">—</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Live Matches</span><span id="statusLiveCount" style="font-weight:600;color:var(--accent)">0</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Upcoming</span><span id="statusUpcomingCount" style="font-weight:600;color:var(--accent2)">0</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Update Interval</span><span id="statusInterval" style="font-weight:600;color:var(--green)">500ms</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Endpoint</span><span style="font-size:10px;font-family:monospace;color:var(--text3)">—</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── MODALS ── -->
+<!-- ── ADMIN LOGIN MODAL ── -->
+<div class="modal-bg" id="adminLoginModal">
+  <div class="modal" style="width:360px">
+    <div class="modal-hd"><div class="modal-title">🔒 Admin Access</div><button class="modal-close" onclick="closeModal('adminLoginModal')">✕</button></div>
+    <div class="modal-bd">
+      <div class="fg">
+        <label class="fl">Password</label>
+        <input class="fi" type="password" id="adminPasswordInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')checkAdminPassword()">
+      </div>
+      <div id="adminLoginError" style="color:var(--red);font-size:11px;margin-top:-6px;display:none">❌ Incorrect password</div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-outline" onclick="closeModal('adminLoginModal')">Cancel</button>
+      <button class="btn btn-accent" onclick="checkAdminPassword()">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="depositModal">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">💳 Add Funds</div><button class="modal-close" onclick="closeModal('depositModal')">✕</button></div>
+    <div class="modal-bd">
+      <div class="fg"><label class="fl">Amount (₹)</label><input class="fi" type="number" id="depAmt" placeholder="Enter amount" min="10"></div>
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <button class="qs" onclick="setDepAmt(500)">₹500</button>
+        <button class="qs" onclick="setDepAmt(1000)">₹1K</button>
+        <button class="qs" onclick="setDepAmt(5000)">₹5K</button>
+        <button class="qs" onclick="setDepAmt(10000)">₹10K</button>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-outline" onclick="closeModal('depositModal')">Cancel</button>
+      <button class="btn btn-accent" onclick="doDeposit()">Add Funds</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="withdrawModal">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">🏧 Withdraw Funds</div><button class="modal-close" onclick="closeModal('withdrawModal')">✕</button></div>
+    <div class="modal-bd">
+      <div class="fg"><label class="fl">Amount (₹)</label><input class="fi" type="number" id="withdrawAmt" placeholder="Enter amount" min="100"></div>
+      <div class="fg"><label class="fl">UPI ID / Bank Account</label><input class="fi" type="text" placeholder="Enter UPI ID"></div>
+      <div style="font-size:11px;color:var(--text3)">Min withdrawal: ₹100 · Processing: 1-2 business days</div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-outline" onclick="closeModal('withdrawModal')">Cancel</button>
+      <button class="btn btn-accent" onclick="doWithdraw()">Withdraw</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="addMatchModal">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title">📋 Add Match</div><button class="modal-close" onclick="closeModal('addMatchModal')">✕</button></div>
+    <div class="modal-bd">
+      <div class="fg"><label class="fl">Sport</label>
+        <select class="fs" id="amSport" onchange="toggleDrawField()">
+          <option value="football">⚽ Football</option>
+          <option value="cricket">🏏 Cricket</option>
+          <option value="tennis">🎾 Tennis</option>
+          <option value="basketball">🏀 Basketball</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label class="fl">Team 1</label><input class="fi" type="text" id="amT1" placeholder="Home team"></div>
+        <div class="fg"><label class="fl">Team 2</label><input class="fi" type="text" id="amT2" placeholder="Away team"></div>
+      </div>
+      <div class="fg"><label class="fl">League / Tournament</label><input class="fi" type="text" id="amLeague" placeholder="e.g. IPL 2026"></div>
+      <div class="fg"><label class="fl">Venue</label><input class="fi" type="text" id="amVenue" placeholder="Stadium name"></div>
+      <div class="form-row">
+        <div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="amDate"></div>
+        <div class="fg"><label class="fl">Time</label><input class="fi" type="time" id="amTime"></div>
+      </div>
+      <div class="form-row3">
+        <div class="fg"><label class="fl">W1 Odds</label><input class="fi" type="number" id="amO1" value="1.90" step="0.01"></div>
+        <div class="fg" id="drawField"><label class="fl">Draw Odds</label><input class="fi" type="number" id="amOD" value="3.50" step="0.01"></div>
+        <div class="fg"><label class="fl">W2 Odds</label><input class="fi" type="number" id="amO2" value="1.95" step="0.01"></div>
+      </div>
+      <div class="fg"><label class="fl">O/U Line</label><input class="fi" type="number" id="amOU" value="2.5" step="0.5"></div>
+      <div class="fg">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px">
+          <input type="checkbox" id="amIsLive"> Mark as Live (in-progress)
+        </label>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-outline" onclick="closeModal('addMatchModal')">Cancel</button>
+      <button class="btn btn-accent" onclick="addCustomMatch()">Add Match</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<!-- ── SCRIPT ── -->
+<script>
+// ================================================================
+// CONSTANTS & CONFIG
+// ================================================================
+const HOUSE_EDGE   = 0.05;
+const ODDS_API_KEY = '6b8561559a1e7cb4ba96a8fda5dc90fb';
+const ODDS_API_BASE= 'https://api.the-odds-api.com/v4';
+
+// Sport keys for The Odds API
+const SPORT_KEYS = {
+  cricket_ipl:    'cricket_ipl',
+  cricket_t20:    'cricket_international_t20',
+  cricket_odi:    'cricket_odi',
+  cricket_test:   'cricket_test_match',
+  football_epl:   'soccer_epl',
+  football_laliga:'soccer_spain_la_liga',
+  football_cl:    'soccer_uefa_champs_league',
+  football_seria: 'soccer_italy_serie_a',
+  football_bl:    'soccer_germany_bundesliga',
+  football_ligue1:'soccer_france_ligue_one',
+  basketball_nba: 'basketball_nba',
+  tennis_atp:     'tennis_atp_french_open',
+  tennis_wta:     'tennis_wta_french_open',
+};
+
+// ESPN fallback for live scores (free, no key)
+const ESPN = {
+  cricket_ipl:    'https://site.api.espn.com/apis/site/v2/sports/cricket/8039/scoreboard',
+  cricket_t20:    'https://site.api.espn.com/apis/site/v2/sports/cricket/8677/scoreboard',
+  football_epl:   'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard',
+  football_laliga:'https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/scoreboard',
+  football_cl:    'https://site.api.espn.com/apis/site/v2/sports/soccer/UEFA.CHAMPIONS/scoreboard',
+  football_il:    'https://site.api.espn.com/apis/site/v2/sports/soccer/ita.1/scoreboard',
+  football_bl:    'https://site.api.espn.com/apis/site/v2/sports/soccer/ger.1/scoreboard',
+  football_fl:    'https://site.api.espn.com/apis/site/v2/sports/soccer/fra.1/scoreboard',
+  basketball:     'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
+  tennis_atp:     'https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard',
+  tennis_wta:     'https://site.api.espn.com/apis/site/v2/sports/tennis/wta/scoreboard',
+};
+
+// CORS proxies for ESPN (Odds API is called directly — no proxy needed)
+const CORS_PROXIES = [
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+];
+let _activeProxy = 0;
+
+async function proxyFetch(rawUrl) {
+  const timeout = ms => new Promise((_,rej) => setTimeout(()=>rej(new Error('timeout')), ms));
+  for (let attempt = 0; attempt < CORS_PROXIES.length; attempt++) {
+    const idx = (_activeProxy + attempt) % CORS_PROXIES.length;
+    try {
+      const res = await Promise.race([
+        fetch(CORS_PROXIES[idx](rawUrl), { cache:'no-store', headers:{'X-Requested-With':'XMLHttpRequest'} }),
+        timeout(8000)
+      ]);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      _activeProxy = idx;
+      return data;
+    } catch(e) { /* try next */ }
+  }
+  // Direct fetch as last resort
+  const res = await Promise.race([
+    fetch(rawUrl, { cache:'no-store' }),
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),6000))
+  ]);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// ================================================================
+// ODDS API — direct fetch (no proxy needed, CORS allowed)
+// ================================================================
+async function oddsApiFetch(path) {
+  const url = `${ODDS_API_BASE}${path}&apiKey=${ODDS_API_KEY}`;
+  const res = await fetch(url, { cache: 'no-store' });
+  const remaining = res.headers.get('x-requests-remaining');
+  const used      = res.headers.get('x-requests-used');
+  updateApiQuota(remaining, used);
+  if (!res.ok) throw new Error(`OddsAPI ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+function updateApiQuota(remaining, used) {
+  if (remaining === null) return;
+  const el = document.getElementById('apiQuota');
+  if (el) el.textContent = `API: ${used||'?'} used · ${remaining||'?'} left`;
+}
+
+// ================================================================
+// STATE
+// ================================================================
+let balance = 1000.00;
+let totalWagered=0, totalWon=0, totalBets=0, wins=0, houseProfit=0;
+let betSlip = [];
+let betHistory = [];
+let betIdCtr = 1001;
+let liveMatches     = { cricket:[], football:[], tennis:[], basketball:[] };
+let upcomingMatches = { cricket:[], football:[], tennis:[], basketball:[] };
+// Scores fetched from ESPN, keyed by "t1 vs t2" lowercased
+let liveScoreCache  = {};
+let customMatches   = [];
+let txHistory       = [];
+let apiConnected    = false;
+let dataRefreshTimer= null;
+let selectedProvider= 'oddsapi';
+let apiConfig       = { provider:'oddsapi', key:ODDS_API_KEY, interval:30 };
+
+// ================================================================
+// TEAM BRANDING
+// ================================================================
+const CRICKET_TEAMS = {
+  'Mumbai Indians':{abbr:'MI',bg:'#004BA0',fg:'#fff'},
+  'Chennai Super Kings':{abbr:'CSK',bg:'#F4C300',fg:'#000'},
+  'Royal Challengers Bengaluru':{abbr:'RCB',bg:'#C8102E',fg:'#fff'},
+  'Royal Challengers Bangalore':{abbr:'RCB',bg:'#C8102E',fg:'#fff'},
+  'Kolkata Knight Riders':{abbr:'KKR',bg:'#3A225D',fg:'#FFD700'},
+  'Delhi Capitals':{abbr:'DC',bg:'#0078BC',fg:'#fff'},
+  'Sunrisers Hyderabad':{abbr:'SRH',bg:'#F7A721',fg:'#000'},
+  'Rajasthan Royals':{abbr:'RR',bg:'#EA1A85',fg:'#fff'},
+  'Punjab Kings':{abbr:'PBKS',bg:'#ED1B24',fg:'#fff'},
+  'Gujarat Titans':{abbr:'GT',bg:'#1C2951',fg:'#fff'},
+  'Lucknow Super Giants':{abbr:'LSG',bg:'#A72B2A',fg:'#fff'},
+  'India':{abbr:'IND',bg:'#FF9933',fg:'#fff'},
+  'Australia':{abbr:'AUS',bg:'#FFD700',fg:'#000'},
+  'England':{abbr:'ENG',bg:'#003082',fg:'#fff'},
+  'Pakistan':{abbr:'PAK',bg:'#006400',fg:'#fff'},
+  'South Africa':{abbr:'SA',bg:'#007A4D',fg:'#fff'},
+  'New Zealand':{abbr:'NZ',bg:'#000',fg:'#fff'},
+  'West Indies':{abbr:'WI',bg:'#7B0505',fg:'#FFD700'},
+  'Sri Lanka':{abbr:'SL',bg:'#003082',fg:'#FFD700'},
+  'Bangladesh':{abbr:'BAN',bg:'#006A4E',fg:'#fff'},
+  'Afghanistan':{abbr:'AFG',bg:'#0032A0',fg:'#fff'},
+};
+const FOOTBALL_TEAMS = {
+  'Manchester City':{abbr:'MCI',bg:'#6CABDD',fg:'#fff'},
+  'Arsenal':{abbr:'ARS',bg:'#EF0107',fg:'#fff'},
+  'Liverpool':{abbr:'LIV',bg:'#C8102E',fg:'#fff'},
+  'Chelsea':{abbr:'CHE',bg:'#034694',fg:'#fff'},
+  'Manchester United':{abbr:'MUN',bg:'#DA291C',fg:'#fff'},
+  'Tottenham Hotspur':{abbr:'TOT',bg:'#132257',fg:'#fff'},
+  'Real Madrid':{abbr:'RMA',bg:'#003087',fg:'#FFD700'},
+  'Barcelona':{abbr:'BAR',bg:'#A50044',fg:'#004D98'},
+  'PSG':{abbr:'PSG',bg:'#004170',fg:'#DA291C'},
+  'Paris Saint-Germain':{abbr:'PSG',bg:'#004170',fg:'#DA291C'},
+  'Bayern Munich':{abbr:'BAY',bg:'#DC052D',fg:'#fff'},
+  'Borussia Dortmund':{abbr:'BVB',bg:'#FDE100',fg:'#000'},
+  'Juventus':{abbr:'JUV',bg:'#000',fg:'#fff'},
+  'AC Milan':{abbr:'MIL',bg:'#FB090B',fg:'#000'},
+  'Inter Milan':{abbr:'INT',bg:'#003F8A',fg:'#000'},
+  'Atletico Madrid':{abbr:'ATM',bg:'#CB3524',fg:'#fff'},
+  'Napoli':{abbr:'NAP',bg:'#13A3E1',fg:'#fff'},
+};
+const FEED_NAMES=['Rahul K.','Priya S.','Arjun M.','Deepika R.','Vikram T.','Ananya P.','Rohan V.','Sanjay B.','Kavita N.','Aditya L.','Sneha G.','Karthik R.','Meera J.','Suresh D.','Pooja A.'];
+let iplPoints = [];
+
+// ================================================================
+// HELPERS
+// ================================================================
+function allLiveList(sport) {
+  if (sport && sport!=='all') return liveMatches[sport]||[];
+  return [...(liveMatches.cricket||[]),...(liveMatches.football||[]),...(liveMatches.tennis||[]),...(liveMatches.basketball||[]),...customMatches.filter(m=>m.status==='live')];
+}
+function allUpcomingList(sport) {
+  if (sport && sport!=='all') return upcomingMatches[sport]||[];
+  return [...(upcomingMatches.cricket||[]),...(upcomingMatches.football||[]),...(upcomingMatches.tennis||[]),...(upcomingMatches.basketball||[]),...customMatches.filter(m=>m.status==='upcoming')];
+}
+function allMatchesList() { return [...allLiveList(),...allUpcomingList()]; }
+function getMatch(id) { return allMatchesList().find(m=>m.id==id); }
+function getTeamData(name,sport) {
+  if(sport==='cricket') return CRICKET_TEAMS[name]||{abbr:name.substring(0,3).toUpperCase(),bg:'#1d3a5c',fg:'#fff'};
+  if(sport==='football') return FOOTBALL_TEAMS[name]||{abbr:name.substring(0,3).toUpperCase(),bg:'#1a3050',fg:'#fff'};
+  return {abbr:name.substring(0,3).toUpperCase(),bg:'#1d9bf0',fg:'#fff'};
+}
+function teamLogoHTML(name,sport,size=32) {
+  const t=getTeamData(name,sport);
+  return `<div class="team-logo" style="width:${size}px;height:${size}px;background:${t.bg};color:${t.fg};font-size:${size>26?9:7}px;border-radius:8px;flex-shrink:0">${t.abbr}</div>`;
+}
+function fmt(v){return '₹'+parseFloat(v).toFixed(2);}
+function fmtN(v){return parseFloat(v).toFixed(2);}
+function toOdd(prob){const raw=1/(prob*(1+HOUSE_EDGE));return parseFloat(Math.max(1.05,raw).toFixed(2));}
+
+// ================================================================
+// ODDS API → MATCH PARSER
+// Converts an Odds API event (with bookmaker odds) to our match obj
+// ================================================================
+function parseOddsEvent(ev, sport, leagueName) {
+  if (!ev) return null;
+  const t1 = ev.home_team;
+  const t2 = ev.away_team;
+  if (!t1 || !t2) return null;
+
+  const now = new Date();
+  const commence = new Date(ev.commence_time);
+  const isLive = commence <= now;   // Odds API: if commence_time < now → in-play
+  const status = isLive ? 'live' : 'upcoming';
+
+  // Time string
+  const timeStr = commence.toLocaleString('en-IN',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'Asia/Kolkata'});
+
+  // Extract odds from bookmakers
+  // Prefer Pinnacle > Bet365 > first available
+  const PREF_BOOKS = ['pinnacle','bet365','draftkings','fanduel','betmgm','williamhill','unibet','betway'];
+  let bookmaker = ev.bookmakers?.find(b=>PREF_BOOKS.includes(b.key))
+                || ev.bookmakers?.[0];
+
+  let o1=1.90, o2=1.90, oDraw=null, oOver=1.90, oUnder=1.90, oOU=2.5;
+
+  if (bookmaker) {
+    // h2h market → win/draw/win
+    const h2h = bookmaker.markets?.find(m=>m.key==='h2h');
+    if (h2h) {
+      const home = h2h.outcomes?.find(o=>o.name===t1);
+      const away = h2h.outcomes?.find(o=>o.name===t2);
+      const draw = h2h.outcomes?.find(o=>o.name==='Draw');
+      if (home) o1 = parseFloat(home.price.toFixed(2));
+      if (away) o2 = parseFloat(away.price.toFixed(2));
+      if (draw) oDraw = parseFloat(draw.price.toFixed(2));
+    }
+    // totals market → O/U
+    const totals = bookmaker.markets?.find(m=>m.key==='totals');
+    if (totals) {
+      const over  = totals.outcomes?.find(o=>o.name==='Over');
+      const under = totals.outcomes?.find(o=>o.name==='Under');
+      if (over)  { oOver = parseFloat(over.price.toFixed(2));  oOU = over.point||oOU; }
+      if (under) { oUnder = parseFloat(under.price.toFixed(2)); }
+    }
+  }
+
+  // Register unknown teams in our brand maps
+  const abbr1 = t1.split(' ').map(w=>w[0]).join('').substring(0,3).toUpperCase();
+  const abbr2 = t2.split(' ').map(w=>w[0]).join('').substring(0,3).toUpperCase();
+  if (sport==='cricket'&&!CRICKET_TEAMS[t1]) CRICKET_TEAMS[t1]={abbr:abbr1,bg:'#1d3a5c',fg:'#fff'};
+  if (sport==='cricket'&&!CRICKET_TEAMS[t2]) CRICKET_TEAMS[t2]={abbr:abbr2,bg:'#2a1a3a',fg:'#fff'};
+  if (sport==='football'&&!FOOTBALL_TEAMS[t1]) FOOTBALL_TEAMS[t1]={abbr:abbr1,bg:'#1a3050',fg:'#fff'};
+  if (sport==='football'&&!FOOTBALL_TEAMS[t2]) FOOTBALL_TEAMS[t2]={abbr:abbr2,bg:'#2a1d3a',fg:'#fff'};
+
+  // Live score from ESPN cache (merged later)
+  const cacheKey = `${t1.toLowerCase()} vs ${t2.toLowerCase()}`;
+  const cached   = liveScoreCache[cacheKey] || {};
+
+  // Derived markets using true-probability engine
+  const p1 = 1/o1, p2 = 1/o2;
+  const total = p1+p2+(oDraw?1/oDraw:0);
+  const tp1=p1/total, tp2=p2/total;
+
+  const oToss1 = toOdd(0.50), oToss2 = toOdd(0.50);
+  const batStr1= tp1;
+  const o6s1   = parseFloat(Math.max(1.50,toOdd(batStr1*0.90)).toFixed(2));
+  const o6s2   = parseFloat(Math.max(1.50,toOdd((1-batStr1)*0.90)).toFixed(2));
+  const o1H1   = parseFloat(Math.max(1.20,toOdd(tp1*0.82)).toFixed(2));
+  const o1H2   = parseFloat(Math.max(1.20,toOdd(tp2*0.82)).toFixed(2));
+  const oDH    = parseFloat(Math.max(2.50,toOdd(0.36)).toFixed(2));
+  const oSet1  = parseFloat(Math.max(1.10,toOdd(tp1*0.95+0.025)).toFixed(2));
+  const oSet2  = parseFloat(Math.max(1.10,toOdd(tp2*0.95+0.025)).toFixed(2));
+  const ouLine = sport==='cricket'?155:sport==='basketball'?215:sport==='tennis'?22:oOU;
+
+  return {
+    id:     ev.id,
+    sport, league: leagueName, t1, t2,
+    venue:  cached.venue||'',
+    score1: cached.score1??null,
+    score2: cached.score2??null,
+    minute: cached.minute??null,
+    overs1: cached.overs1??null,
+    overs2: cached.overs2??null,
+    time:   timeStr, status,
+    o1, o2, oDraw,
+    oOU: parseFloat(ouLine.toFixed(1)),
+    oOver, oUnder,
+    oToss1, oToss2,
+    o6s1, o6s2,
+    o1H1, o1H2, oDH,
+    oSet1, oSet2,
+    lastOddsUpdate: new Date().toLocaleTimeString(),
+    bookmaker: bookmaker?.title || 'Best Odds',
+    apiSource: 'OddsAPI',
+  };
+}
+
+// ================================================================
+// FETCH ODDS FROM THE ODDS API
+// ================================================================
+async function fetchOddsSport(sportKey, sport, leagueName) {
+  try {
+    // markets: h2h (win/draw/win) + totals (over/under)
+    const path = `/sports/${sportKey}/odds/?regions=uk,eu,us&markets=h2h,totals&oddsFormat=decimal`;
+    const events = await oddsApiFetch(path);
+    if (!Array.isArray(events)) return [];
+    return events.map(ev=>parseOddsEvent(ev,sport,leagueName)).filter(Boolean);
+  } catch(e) {
+    console.warn(`[OddsAPI] ${sportKey} failed:`, e.message);
+    return [];
+  }
+}
+
+// Fetch live scores from Odds API scores endpoint
+async function fetchOddsScores(sportKey, sport) {
+  try {
+    const path = `/sports/${sportKey}/scores/?daysFrom=1`;
+    const scores = await oddsApiFetch(path);
+    if (!Array.isArray(scores)) return;
+    scores.forEach(s => {
+      const t1 = s.home_team, t2 = s.away_team;
+      const key = `${t1.toLowerCase()} vs ${t2.toLowerCase()}`;
+      const sc  = s.scores;
+      if (!sc) return;
+      const h = sc.find(x=>x.name===t1);
+      const a = sc.find(x=>x.name===t2);
+      liveScoreCache[key] = {
+        score1: h?.score ?? null,
+        score2: a?.score ?? null,
+        minute: s.last_update ? new Date(s.last_update).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : null,
+        completed: s.completed,
+      };
+    });
+  } catch(e) {
+    // Scores endpoint may not be available for all sports — silently skip
+  }
+}
+
+// ================================================================
+// ESPN SCORE FETCHER (free, no key, merged into matches)
+// ================================================================
+async function fetchESPNScores(url, sport) {
+  try {
+    const data = await proxyFetch(url);
+    const events = data.events||[];
+    events.forEach(ev=>{
+      const comp = ev.competitions?.[0];
+      if(!comp) return;
+      const home = comp.competitors?.find(c=>c.homeAway==='home')||comp.competitors?.[0];
+      const away = comp.competitors?.find(c=>c.homeAway==='away')||comp.competitors?.[1];
+      if(!home||!away) return;
+      const t1 = (home.team?.displayName||home.team?.name||'').toLowerCase();
+      const t2 = (away.team?.displayName||away.team?.name||'').toLowerCase();
+      const isLive = ev.status?.type?.state==='in';
+      const isPost = ev.status?.type?.state==='post';
+      if(!isLive&&!isPost) return;
+      const key = `${t1} vs ${t2}`;
+      if(sport==='cricket'){
+        liveScoreCache[key]={
+          score1: home.score||null,
+          score2: away.score||null,
+          overs1: ev.status?.displayClock||ev.status?.type?.shortDetail||null,
+          minute: ev.status?.displayClock||null,
+          venue:  comp.venue?.fullName||'',
+        };
+      } else if(sport==='football'){
+        liveScoreCache[key]={
+          score1: parseInt(home.score)||0,
+          score2: parseInt(away.score)||0,
+          minute: Math.round(ev.status?.clock)||null,
+          venue:  comp.venue?.fullName||comp.venue?.address?.city||'',
+        };
+      } else if(sport==='basketball'){
+        liveScoreCache[key]={
+          score1: parseInt(home.score)||0,
+          score2: parseInt(away.score)||0,
+          minute: ev.status?.type?.shortDetail||'Live',
+          venue:  comp.venue?.fullName||'',
+        };
+      } else if(sport==='tennis'){
+        liveScoreCache[key]={
+          score1: home.score||null,
+          score2: away.score||null,
+          minute: ev.status?.type?.shortDetail||'In Progress',
+          venue:  comp.venue?.fullName||comp.venue?.address?.city||'',
+        };
+      }
+    });
+  } catch(e) {
+    // ESPN proxy may fail — not critical
+  }
+}
+
+// Merge ESPN live scores into existing match objects
+function mergeScoresIntoMatches() {
+  const mergeList = obj => {
+    Object.values(obj).flat().forEach(m => {
+      const key = `${m.t1.toLowerCase()} vs ${m.t2.toLowerCase()}`;
+      const cached = liveScoreCache[key];
+      if (!cached) return;
+      if (cached.score1!==undefined) m.score1 = cached.score1;
+      if (cached.score2!==undefined) m.score2 = cached.score2;
+      if (cached.minute!==undefined) m.minute = cached.minute;
+      if (cached.overs1!==undefined) m.overs1 = cached.overs1;
+      if (cached.venue)              m.venue  = cached.venue;
+      if (cached.score1!==null)      m.status = 'live';
+    });
+  };
+  mergeList(liveMatches);
+  mergeList(upcomingMatches);
+}
+
+// ================================================================
+// MAIN DATA FETCH — Odds API + ESPN scores merged
+// ================================================================
+async function fetchAllData() {
+  setApiStatus('loading','🔄 Fetching live odds...');
+
+  const tmp = { cricket:[], football:[], tennis:[], basketball:[] };
+
+  // 1. Fetch odds from The Odds API in parallel
+  const oddsJobs = [
+    fetchOddsSport(SPORT_KEYS.cricket_ipl,    'cricket',    'IPL 2026'),
+    fetchOddsSport(SPORT_KEYS.cricket_t20,    'cricket',    'T20 International'),
+    fetchOddsSport(SPORT_KEYS.cricket_odi,    'cricket',    'ODI'),
+    fetchOddsSport(SPORT_KEYS.football_epl,   'football',   'Premier League'),
+    fetchOddsSport(SPORT_KEYS.football_laliga,'football',   'La Liga'),
+    fetchOddsSport(SPORT_KEYS.football_cl,    'football',   'Champions League'),
+    fetchOddsSport(SPORT_KEYS.football_seria, 'football',   'Serie A'),
+    fetchOddsSport(SPORT_KEYS.football_bl,    'football',   'Bundesliga'),
+    fetchOddsSport(SPORT_KEYS.football_ligue1,'football',   'Ligue 1'),
+    fetchOddsSport(SPORT_KEYS.basketball_nba, 'basketball', 'NBA'),
+    fetchOddsSport(SPORT_KEYS.tennis_atp,     'tennis',     'ATP Tour'),
+    fetchOddsSport(SPORT_KEYS.tennis_wta,     'tennis',     'WTA Tour'),
+  ];
+  const results = await Promise.allSettled(oddsJobs);
+  const sportList = ['cricket','cricket','cricket','football','football','football','football','football','football','basketball','tennis','tennis'];
+  results.forEach((r,i)=>{
+    if(r.status==='fulfilled') r.value.forEach(m=>tmp[sportList[i]].push(m));
+  });
+
+  // 2. Fetch ESPN live scores in parallel (best-effort, no failure)
+  const scoreJobs = [
+    fetchESPNScores(ESPN.cricket_ipl,    'cricket'),
+    fetchESPNScores(ESPN.cricket_t20,    'cricket'),
+    fetchESPNScores(ESPN.football_epl,   'football'),
+    fetchESPNScores(ESPN.football_laliga,'football'),
+    fetchESPNScores(ESPN.football_cl,    'football'),
+    fetchESPNScores(ESPN.basketball,     'basketball'),
+    fetchESPNScores(ESPN.tennis_atp,     'tennis'),
+  ];
+  // Also fetch Odds API scores for sports that support it
+  const oddsScoreJobs = [
+    fetchOddsScores(SPORT_KEYS.football_epl, 'football'),
+    fetchOddsScores(SPORT_KEYS.basketball_nba,'basketball'),
+    fetchOddsScores(SPORT_KEYS.cricket_ipl,  'cricket'),
+  ];
+  await Promise.allSettled([...scoreJobs, ...oddsScoreJobs]);
+
+  const total = Object.values(tmp).reduce((s,a)=>s+a.length,0);
+  if (total===0) {
+    setApiStatus('error','⚠️ No data from Odds API — check API key or quota');
+    return false;
+  }
+
+  // 3. Deduplicate by id
+  const dedup = arr => arr.filter((m,i,a)=>a.findIndex(x=>x.id===m.id)===i);
+
+  // 4. Split into live / upcoming based on commence_time
+  liveMatches     = {cricket:[],football:[],tennis:[],basketball:[]};
+  upcomingMatches = {cricket:[],football:[],tennis:[],basketball:[]};
+  const now = new Date();
+  ['cricket','football','tennis','basketball'].forEach(s=>{
+    dedup(tmp[s]).forEach(m=>{
+      if (m.status==='live') liveMatches[s].push(m);
+      else upcomingMatches[s].push(m);
+    });
+  });
+
+  // 5. Merge ESPN scores into Odds API matches
+  mergeScoresIntoMatches();
+
+  apiConnected = true;
+  const liveCount = allLiveList().length;
+  const upCount   = allUpcomingList().length;
+  const t = new Date().toLocaleTimeString();
+  setApiStatus('connected',`✅ The Odds API · ${liveCount} LIVE · ${upCount} Upcoming · Updated ${t}`);
+  const sl=document.getElementById('statusLastUpdate'); if(sl) sl.textContent=t;
+  const pn=document.getElementById('statusProvider');   if(pn) pn.textContent='The Odds API';
+  const si=document.getElementById('statusInterval');   if(si) si.textContent=`${apiConfig.interval||30}s`;
+  updateStatusCounts();
+  renderAllPages();
+  return true;
+}
+
+function startDataRefresh() {
+  if(dataRefreshTimer) clearInterval(dataRefreshTimer);
+  const ms = Math.max(30000,(apiConfig.interval||30)*1000);
+  dataRefreshTimer = setInterval(async ()=>{
+    setApiStatus('loading','🔄 Refreshing odds & scores...');
+    const ok = await fetchAllData().catch(()=>false);
+    if(!ok) setApiStatus('error','⚠️ Refresh failed — retrying');
+  }, ms);
+}
+
+// ================================================================
+// RENDER MATCH CARD
+// ================================================================
+function renderMatchCard(m) {
+  const live  = m.status==='live';
+  const sport = m.sport;
+  let scoreHtml='';
+  if(live){
+    if(sport==='cricket'){
+      scoreHtml=`<div class="vs-score-main" style="font-size:11px">${m.score1||'—'}</div><div style="font-size:8px;color:var(--orange);font-weight:700">vs</div><div class="vs-score-main" style="font-size:11px">${m.score2||'—'}</div><div class="vs-time">${m.overs1||m.minute||'Live'}</div>`;
+    } else if(sport==='football'){
+      scoreHtml=`<div class="vs-score-main">${m.score1??'0'} - ${m.score2??'0'}</div><div class="vs-time">${m.minute?"'"+m.minute:"Live"}</div>`;
+    } else if(sport==='tennis'){
+      scoreHtml=`<div class="vs-score-main" style="font-size:11px">${m.score1||'-'}</div><div style="font-size:8px;color:var(--text3)">vs</div><div class="vs-score-main" style="font-size:11px">${m.score2||'-'}</div><div class="vs-time">${m.minute||'Live'}</div>`;
+    } else {
+      scoreHtml=`<div class="vs-score-main">${m.score1??'0'} - ${m.score2??'0'}</div><div class="vs-time">${m.minute||'Live'}</div>`;
+    }
+  } else {
+    scoreHtml=`<div class="vs-label">VS</div><div class="vs-time">${m.time||'Upcoming'}</div>`;
+  }
+  const sportEmoji={cricket:'🏏',football:'⚽',tennis:'🎾',basketball:'🏀'}[sport]||'🎮';
+  const bookBadge = m.bookmaker ? `<span style="font-size:8px;color:var(--text3);background:var(--bg4);padding:1px 5px;border-radius:3px;border:1px solid var(--border)">${m.bookmaker}</span>` : '';
+  return `<div class="match-card ${live?'live-card':''}" id="mc-${m.id}">
+    <div class="mc-top">
+      <div style="display:flex;align-items:center;gap:5px">
+        <span>${sportEmoji}</span>
+        <span class="mc-league">${m.league}</span>
+        ${m.venue?`<span class="mc-venue">· ${m.venue}</span>`:''}
+        ${bookBadge}
+      </div>
+      <div>${live?`<div class="live-tag"><div class="ldot" style="width:5px;height:5px;margin-right:2px"></div>LIVE</div>`:`<span class="upcoming-tag">UPCOMING</span>`}</div>
+    </div>
+    <div class="teams-grid">
+      <div class="team-side">
+        ${teamLogoHTML(m.t1,sport)}
+        <div style="min-width:0">
+          <div class="t-name">${m.t1}</div>
+          ${live&&sport==='cricket'&&m.score1?`<div class="t-score">${m.score1}${m.overs1?' ('+m.overs1+')':''}</div>`:''}
+        </div>
+      </div>
+      <div class="vs-center">${scoreHtml}</div>
+      <div class="team-side right">
+        <div class="team-info right" style="min-width:0;text-align:right">
+          <div class="t-name">${m.t2}</div>
+          ${live&&sport==='cricket'&&m.score2?`<div class="t-score">${m.score2}${m.overs2?' ('+m.overs2+')':''}</div>`:''}
+        </div>
+        ${teamLogoHTML(m.t2,sport)}
+      </div>
+    </div>
+    ${buildMarkets(m)}
+  </div>`;
+}
+
+function buildMarkets(m) {
+  const id=m.id, sport=m.sport;
+  const t1a=getTeamData(m.t1,sport).abbr, t2a=getTeamData(m.t2,sport).abbr;
+  let html=`<div class="markets-wrap">`;
+  html+=`<div class="market-row"><div class="mkt-label">Match Winner</div><div class="odds-grid ${m.oDraw?'g3':'g2'}">`;
+  html+=oddbtn(id,m.t1,m.o1,'Match Winner',t1a);
+  if(m.oDraw) html+=oddbtn(id,'Draw',m.oDraw,'Match Winner','Draw');
+  html+=oddbtn(id,m.t2,m.o2,'Match Winner',t2a);
+  html+=`</div></div>`;
+  const ouLabel=sport==='cricket'?`Runs O/U ${m.oOU}`:sport==='tennis'?`Games O/U ${m.oOU}`:sport==='basketball'?`Points O/U ${m.oOU}`:`Goals O/U ${m.oOU}`;
+  html+=`<div class="market-row"><div class="mkt-label">${ouLabel}</div><div class="odds-grid g2">`;
+  html+=oddbtn(id,`Over ${m.oOU}`,m.oOver,'Over/Under','Over');
+  html+=oddbtn(id,`Under ${m.oOU}`,m.oUnder,'Over/Under','Under');
+  html+=`</div></div>`;
+  if(sport==='cricket'){
+    html+=`<div class="market-row"><div class="mkt-label">Toss Winner</div><div class="odds-grid g2">`;
+    html+=oddbtn(id,m.t1+' Toss',m.oToss1||1.9,'Toss Winner',t1a+' Toss');
+    html+=oddbtn(id,m.t2+' Toss',m.oToss2||1.9,'Toss Winner',t2a+' Toss');
+    html+=`</div></div>`;
+    html+=`<div class="market-row"><div class="mkt-label">Most Sixes</div><div class="odds-grid g2">`;
+    html+=oddbtn(id,m.t1+' Most 6s',m.o6s1||3.0,'Most Sixes',t1a+' 6s');
+    html+=oddbtn(id,m.t2+' Most 6s',m.o6s2||3.5,'Most Sixes',t2a+' 6s');
+    html+=`</div></div>`;
+  }
+  if(sport==='football'){
+    html+=`<div class="market-row"><div class="mkt-label">Half Time Result</div><div class="odds-grid g3">`;
+    html+=oddbtn(id,m.t1+' HT',m.o1H1||2.2,'Half Time',t1a+' HT');
+    html+=oddbtn(id,'HT Draw',m.oDH||3.4,'Half Time','Draw HT');
+    html+=oddbtn(id,m.t2+' HT',m.o1H2||3.5,'Half Time',t2a+' HT');
+    html+=`</div></div>`;
+    html+=`<div class="market-row"><div class="mkt-label">Double Chance</div><div class="odds-grid g3">`;
+    html+=oddbtn(id,m.t1+' or Draw',(m.o1*0.68).toFixed(2),'Double Chance','1X');
+    html+=oddbtn(id,'Either Team',(Math.min(m.o1,m.o2)*0.62).toFixed(2),'Double Chance','12');
+    html+=oddbtn(id,m.t2+' or Draw',(m.o2*0.68).toFixed(2),'Double Chance','X2');
+    html+=`</div></div>`;
+  }
+  if(sport==='tennis'){
+    html+=`<div class="market-row"><div class="mkt-label">Set 1 Winner</div><div class="odds-grid g2">`;
+    html+=oddbtn(id,m.t1+' Set 1',m.oSet1||m.o1,'Set 1 Winner',t1a);
+    html+=oddbtn(id,m.t2+' Set 1',m.oSet2||m.o2,'Set 1 Winner',t2a);
+    html+=`</div></div>`;
+  }
+  if(sport==='basketball'){
+    html+=`<div class="market-row"><div class="mkt-label">1st Quarter Winner</div><div class="odds-grid g2">`;
+    html+=oddbtn(id,m.t1+' Q1',parseFloat((m.o1*0.95).toFixed(2)),'Quarter Winner',t1a+' Q1');
+    html+=oddbtn(id,m.t2+' Q1',parseFloat((m.o2*0.95).toFixed(2)),'Quarter Winner',t2a+' Q1');
+    html+=`</div></div>`;
+  }
+  html+=buildPredPanel(m);
+  html+=`</div>`;
+  return html;
+}
+
+function oddbtn(matchId,pick,odds,market,label){
+  const slipKey=`${matchId}-${market.replace(/\s+/g,'-')}-${pick.replace(/\s+/g,'_')}`;
+  const safe=slipKey.replace(/[^a-zA-Z0-9-_]/g,'');
+  const isSel=betSlip.some(b=>b.slipKey===slipKey);
+  const ov=parseFloat(odds).toFixed(2);
+  return `<div class="odd-btn${isSel?' selected':''}" id="ob-${safe}"
+    onclick="toggleSlip('${matchId}','${pick.replace(/'/g,"\\'")}','${ov}','${market.replace(/'/g,"\\'")}','${label.replace(/'/g,"\\'")}','${slipKey.replace(/'/g,"\\'")}')">
+    <div class="on">${label}</div><div class="ov" id="ov-${safe}">${ov}</div></div>`;
+}
+
+function buildPredPanel(m){
+  const p1=1/m.o1,p2=1/m.o2,pD=m.oDraw?1/m.oDraw:0;
+  const sum=p1+p2+pD;
+  const pct1=Math.round(p1/sum*100),pct2=Math.round(p2/sum*100),pctD=m.oDraw?100-pct1-pct2:0;
+  const items=[{name:m.t1,pct:pct1,color:'var(--accent)',odd:m.o1},...(m.oDraw?[{name:'Draw',pct:pctD,color:'var(--text2)',odd:m.oDraw}]:[]),{name:m.t2,pct:pct2,color:'var(--accent2)',odd:m.o2}];
+  return `<div class="pred-wrap"><div class="pred-title">Win Probability (implied odds)</div>${items.map(it=>`<div class="pred-item"><div class="pred-name">${it.name}</div><div class="pred-prob"><div class="pred-bar"><div class="pred-bar-fill" style="width:${it.pct}%;background:${it.color}"></div></div><div class="pred-pct" style="color:${it.color}">${it.pct}%</div></div><div class="pred-odd">${parseFloat(it.odd).toFixed(2)}x</div></div>`).join('')}</div>`;
+}
+
+// ================================================================
+// RENDER PAGES
+// ================================================================
+let _liveFilter='all',_upcomingFilter='all';
+function filterLiveSport(sport,el){_liveFilter=sport;document.querySelectorAll('#pg-live .sport-pill').forEach(p=>p.classList.remove('active'));if(el)el.classList.add('active');renderLivePage();}
+function filterUpcomingSport(sport,el){_upcomingFilter=sport;document.querySelectorAll('#pg-upcoming .sport-pill').forEach(p=>p.classList.remove('active'));if(el)el.classList.add('active');renderUpcomingPage();}
+
+function renderLivePage(){
+  const sf=_liveFilter;
+  const liveList=allLiveList(sf==='all'?null:sf);
+  const upList=allUpcomingList(sf==='all'?null:sf);
+  const lc=document.getElementById('liveMatchContainer');
+  const uc=document.getElementById('upcomingMatchContainer');
+  if(lc) lc.innerHTML=liveList.length?liveList.map(renderMatchCard).join(''):`<div class="no-matches"><div class="no-matches-icon">📡</div>${apiConnected?'No live matches right now':'Fetching live data from The Odds API...'}</div>`;
+  if(uc) uc.innerHTML=upList.length?upList.map(renderMatchCard).join(''):`<div class="no-matches"><div class="no-matches-icon">📅</div>No upcoming matches found</div>`;
+  renderBetSlipIn('betSlipContainer');
+}
+function renderUpcomingPage(){
+  const sf=_upcomingFilter;
+  const list=allUpcomingList(sf==='all'?null:sf);
+  const el=document.getElementById('upcomingPageContainer');
+  if(el) el.innerHTML=list.length?list.map(renderMatchCard).join(''):`<div class="no-matches"><div class="no-matches-icon">📅</div>No upcoming matches</div>`;
+  renderBetSlipIn('betSlipContainerUpcoming');
+}
+function renderSportPage(sport,containerId,slipId){
+  const el=document.getElementById(containerId); if(!el) return;
+  const all=[...(liveMatches[sport]||[]),...(upcomingMatches[sport]||[]),...customMatches.filter(m=>m.sport===sport)];
+  el.innerHTML=all.length?all.map(renderMatchCard).join(''):`<div class="no-matches"><div class="no-matches-icon">${{cricket:'🏏',football:'⚽',tennis:'🎾',basketball:'🏀'}[sport]||'🎮'}</div>No ${sport} matches found</div>`;
+  if(slipId) renderBetSlipIn(slipId);
+}
+function renderAllPages(){
+  const active=document.querySelector('.page.active'); if(!active) return;
+  const id=active.id;
+  if(id==='pg-live') renderLivePage();
+  else if(id==='pg-upcoming') renderUpcomingPage();
+  else if(id==='pg-cricket'){renderSportPage('cricket','cricketContainer','betSlipContainer2');renderPointsTable('iplPoints');}
+  else if(id==='pg-football') renderSportPage('football','footballContainer','betSlipContainer3');
+  else if(id==='pg-tennis')   renderSportPage('tennis','tennisContainer','betSlipContainer4');
+  else if(id==='pg-basketball') renderSportPage('basketball','basketballContainer','betSlipContainer5');
+  updateTicker(); updateStatusCounts(); updateAdminLiveCounts();
+}
+
+// ================================================================
+// POINTS TABLE
+// ================================================================
+function renderPointsTable(containerId){
+  const el=document.getElementById(containerId); if(!el) return;
+  if(!iplPoints.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--text3);font-size:12px">Loaded from live data</div>';return;}
+  el.innerHTML=iplPoints.map((t,i)=>`<div class="pts-row">
+    <div class="pts-pos ${i<4?'qualify':''}">${i+1}</div>
+    <div class="pts-team-logo" style="background:${t.bg};color:${t.fg}">${t.abbr}</div>
+    <div class="pts-name">${t.name}</div>
+    <div style="font-size:10px;color:var(--text3);min-width:42px;text-align:right">${t.p}G ${t.w}W</div>
+    <div class="pts-val" style="color:${['#f59e0b','#7a9ab8','#cd7f32','#7a9ab8'][i]||'var(--text)'}">${t.pts}</div>
+    <div class="pts-nrr" style="color:${t.nrr&&t.nrr.startsWith('+')?'var(--green)':'var(--red)'}">${t.nrr||''}</div>
+  </div>`).join('');
+}
+
+// ================================================================
+// TICKER
+// ================================================================
+function updateTicker(){
+  const el=document.getElementById('tickerInner'); if(!el) return;
+  const all=allLiveList(); if(!all.length) return;
+  const items=all.map(m=>{
+    let s='';
+    if(m.status==='live'){
+      if(m.sport==='football') s=`${m.score1??0}-${m.score2??0}`;
+      else if(m.score1) s=`${m.score1}`;
+    }
+    return `<div class="tick-item"><span class="tick-live">LIVE</span><span class="tick-match">${m.t1} vs ${m.t2}</span>${s?`<span class="tick-score">${s}</span>`:''}<span style="font-size:10px;color:var(--accent3);font-family:var(--fontD)">${m.o1}/${m.o2}</span></div>`;
+  }).join('');
+  el.innerHTML=items+items;
+}
+
+// ================================================================
+// BET SLIP
+// ================================================================
+function toggleSlip(matchId,pick,odds,market,label,slipKey){
+  const existing=betSlip.findIndex(b=>b.slipKey===slipKey);
+  const sameMatchMarket=betSlip.findIndex(b=>b.matchId==matchId&&b.market===market&&b.slipKey!==slipKey);
+  if(sameMatchMarket>-1){deselOdd(betSlip[sameMatchMarket].slipKey);betSlip.splice(sameMatchMarket,1);}
+  if(existing>-1){deselOdd(slipKey);betSlip.splice(existing,1);}
+  else{
+    const m=getMatch(matchId);
+    betSlip.push({matchId,pick,odds:parseFloat(odds),market,label,slipKey,matchLabel:m?`${m.t1} vs ${m.t2}`:'',sport:m?.sport||''});
+    selOdd(slipKey);
+    toast('info',pick,`${market} · ${parseFloat(odds).toFixed(2)}x`);
+  }
+  renderAllSlips();
+}
+function selOdd(sk){const e=document.getElementById('ob-'+sk.replace(/[^a-zA-Z0-9-_]/g,''));if(e)e.classList.add('selected');}
+function deselOdd(sk){const e=document.getElementById('ob-'+sk.replace(/[^a-zA-Z0-9-_]/g,''));if(e)e.classList.remove('selected');}
+function renderAllSlips(){['betSlipContainer','betSlipContainer2','betSlipContainer3','betSlipContainer4','betSlipContainer5','betSlipContainerUpcoming'].forEach(id=>renderBetSlipIn(id));}
+
+function renderBetSlipIn(containerId){
+  const el=document.getElementById(containerId); if(!el) return;
+  const stake=parseFloat(document.getElementById('stakeVal_'+containerId)?.value)||100;
+  if(!betSlip.length){
+    el.innerHTML=`<div class="betslip"><div class="bs-header"><div class="bs-title">🎫 Bet Slip</div><div class="bs-count">0</div></div>
+      <div class="bs-tabs"><div class="bs-tab active">Single</div><div class="bs-tab">Multi</div><div class="bs-tab">System</div></div>
+      <div class="bs-empty"><div class="bs-empty-icon">🎯</div>Click any odds to add to slip</div></div>`;
+    return;
+  }
+  const multiOdds=betSlip.reduce((a,b)=>a*b.odds,1);
+  const payout=stake*multiOdds;
+  const itemsHtml=betSlip.map((b,i)=>`<div class="bs-item">
+    <div class="bsi-top"><div><div class="bsi-match">${b.matchLabel}</div><div class="bsi-pick">${b.pick}</div></div><button class="bs-remove" onclick="removeSlipItem(${i})">✕</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center"><div class="bsi-mkt">${b.market}</div><div class="bsi-odds">${b.odds.toFixed(2)}x</div></div>
+  </div>`).join('');
+  const multiBanner=betSlip.length>1?`<div class="multi-banner"><div class="mb-legs">${betSlip.length}-Leg Multi</div><div class="mb-odds">${multiOdds.toFixed(2)}x</div></div>`:'';
+  el.innerHTML=`<div class="betslip"><div class="bs-header">
+    <div class="bs-title">🎫 Bet Slip</div>
+    <div style="display:flex;align-items:center;gap:8px"><div class="bs-count">${betSlip.length}</div><button class="btn btn-outline btn-sm" onclick="clearAllSlip()" style="font-size:9px;padding:2px 7px">Clear</button></div>
+  </div>
+  <div class="bs-tabs"><div class="bs-tab active">Single</div><div class="bs-tab">Multi</div><div class="bs-tab">System</div></div>
+  ${itemsHtml}${multiBanner}
+  <div class="stake-section">
+    <div class="sl">Stake (₹)</div>
+    <input class="stake-inp" type="number" id="stakeVal_${containerId}" value="${stake}" min="10" step="10" oninput="refreshPayoutIn('${containerId}')">
+    <div class="qs-row">
+      <button class="qs" onclick="setStakeIn('${containerId}',50)">₹50</button>
+      <button class="qs" onclick="setStakeIn('${containerId}',100)">₹100</button>
+      <button class="qs" onclick="setStakeIn('${containerId}',500)">₹500</button>
+      <button class="qs" onclick="setStakeIn('${containerId}',1000)">₹1k</button>
+    </div>
+  </div>
+  <div class="payout-row">
+    <div><div class="pr-lbl">Total Odds</div><div class="pr-odds">${multiOdds.toFixed(2)}x</div></div>
+    <div style="text-align:right"><div class="pr-lbl">Potential Win</div><div class="pr-val" id="payoutDisp_${containerId}">${fmt(payout)}</div></div>
+  </div>
+  <button class="place-btn" onclick="placeBetFrom('${containerId}')">Place Bet — ${fmt(stake)}</button>
+  </div>`;
+}
+function refreshPayoutIn(cid){const s=parseFloat(document.getElementById('stakeVal_'+cid)?.value)||0;const o=betSlip.reduce((a,b)=>a*b.odds,1);const d=document.getElementById('payoutDisp_'+cid);if(d)d.textContent=fmt(s*o);}
+function setStakeIn(cid,v){const el=document.getElementById('stakeVal_'+cid);if(el){el.value=v;refreshPayoutIn(cid);}}
+function removeSlipItem(i){if(betSlip[i]){deselOdd(betSlip[i].slipKey);betSlip.splice(i,1);}renderAllSlips();}
+function clearAllSlip(){betSlip.forEach(b=>deselOdd(b.slipKey));betSlip=[];renderAllSlips();}
+
+// ================================================================
+// PLACE BET
+// ================================================================
+function placeBetFrom(cid){
+  if(!betSlip.length) return;
+  const stake=parseFloat(document.getElementById('stakeVal_'+cid)?.value)||0;
+  const minBet=parseFloat(document.getElementById('minBetInput')?.value)||10;
+  const maxBet=parseFloat(document.getElementById('maxBetInput')?.value)||50000;
+  if(stake>balance){toast('warn','Insufficient Balance','Add funds to continue');return;}
+  if(stake<minBet){toast('warn',`Min bet ${fmt(minBet)}`,'');return;}
+  if(stake>maxBet){toast('warn',`Max bet ${fmt(maxBet)}`,'');return;}
+  const multiOdds=betSlip.reduce((a,b)=>a*b.odds,1);
+  const payout=parseFloat((stake*multiOdds).toFixed(2));
+  balance-=stake; totalWagered+=stake; totalBets++;
+  const desc=betSlip.length>1?`${betSlip.length}-Leg Multi`:betSlip[0].pick;
+  const matchLbl=betSlip.length>1?betSlip.map(b=>b.pick).join(' + '):betSlip[0].matchLabel;
+  const sport=betSlip[0].sport;
+  const id='B'+betIdCtr++;
+  const mkts=betSlip.map(b=>b.market).join(', ');
+  addHistory(id,sport,matchLbl,desc,mkts,stake,multiOdds,payout,'pending');
+  toast('info','🎫 Bet Placed!',`${fmt(stake)} staked · awaiting result`);
+  addTx('BET',`Pending: ${desc}`,-stake);
+  betSlip.forEach(b=>deselOdd(b.slipKey));
+  betSlip=[];
+  updateBalUI(); renderAllSlips(); addFeedItem(desc,matchLbl,stake,false);
+  updateAdminUI(); renderSettleTable(); updateSettleStats();
+}
+
+// ================================================================
+// BET HISTORY & SETTLEMENT
+// ================================================================
+function addHistory(id,sport,match,pick,market,stake,odds,payout,status){
+  betHistory.unshift({id,sport,match,pick,market,stake,odds,payout,status,time:new Date().toLocaleTimeString()});
+  renderBetsTable(betHistory); renderSettleTable(); updateMyBetsStats(); updateSettleStats();
+}
+function updateMyBetsStats(){
+  const t=document.getElementById('mbTotal'); if(t) t.textContent=totalBets;
+  const w=document.getElementById('mbWagered'); if(w) w.textContent=fmt(totalWagered);
+  const wo=document.getElementById('mbWon'); if(wo) wo.textContent=fmt(totalWon);
+  const pl=balance-1000;
+  const p=document.getElementById('mbPL');
+  if(p){p.textContent=(pl>=0?'+':'')+fmt(Math.abs(pl));p.style.color=pl>=0?'var(--green)':'var(--red)';}
+  const pw=document.getElementById('profileWR');
+  if(pw) pw.textContent=totalBets?Math.round(wins/totalBets*100)+'%':'--%';
+  const pb=document.getElementById('profileBets'); if(pb) pb.textContent=totalBets;
+  const pbw=document.getElementById('profileBigWin');
+  if(pbw){const max=betHistory.filter(b=>b.status==='won').reduce((a,b)=>Math.max(a,b.payout),0);pbw.textContent=fmt(max);}
+}
+function renderBetsTable(data){
+  const tbody=document.getElementById('myBetsTable'); if(!tbody) return;
+  const si=s=>s==='cricket'?'🏏':s==='football'?'⚽':s==='tennis'?'🎾':s==='basketball'?'🏀':'🎯';
+  tbody.innerHTML=data.length?data.map(b=>`<tr>
+    <td style="color:var(--text3);font-size:10px">${b.time}</td>
+    <td>${si(b.sport)} <span style="font-size:11px">${b.sport}</span></td>
+    <td style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.match}</td>
+    <td style="font-weight:600">${b.pick}</td>
+    <td style="font-size:10px;color:var(--text2)">${b.market}</td>
+    <td>${fmt(b.stake)}</td>
+    <td style="font-family:var(--fontD);font-weight:700">${fmtN(b.odds)}x</td>
+    <td style="font-family:var(--fontD);font-weight:700;color:${b.status==='won'?'var(--green)':b.status==='lost'?'var(--red)':b.status==='void'?'var(--text2)':'var(--accent3)'}">
+      ${b.status==='won'?'+'+fmt(b.payout):b.status==='lost'?'-'+fmt(b.stake):b.status==='void'?'↩ Refund':'⏳ Pending'}
+    </td>
+    <td><span class="badge ${b.status==='won'?'bg-green':b.status==='lost'?'bg-red':b.status==='void'?'bg-gray':'bg-orange'}">${b.status.toUpperCase()}</span></td>
+  </tr>`).join(''):'<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text3)">No bets yet</td></tr>';
+}
+function filterMyBets(f,el){
+  document.querySelectorAll('#pg-myBets .btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderBetsTable(f==='all'?betHistory:betHistory.filter(b=>b.status===f));
+}
+let _settleFilter='pending';
+function filterSettle(f,el){_settleFilter=f;document.querySelectorAll('#pg-adminSettle .btn').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');renderSettleTable();}
+function renderSettleTable(){
+  const tbody=document.getElementById('adSettleTable'); if(!tbody) return;
+  const data=_settleFilter==='pending'?betHistory.filter(b=>b.status==='pending'):betHistory;
+  if(!data.length){tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--text3)">${_settleFilter==='pending'?'No pending bets':'No bets yet'}</td></tr>`;updateSettleStats();return;}
+  tbody.innerHTML=data.map(b=>`<tr id="sr-${b.id}">
+    <td style="font-size:10px;color:var(--accent2);font-weight:700">${b.id}</td>
+    <td style="font-size:10px;color:var(--text3)">${b.time}</td>
+    <td style="font-size:11px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.match}</td>
+    <td style="font-weight:600;font-size:12px">${b.pick}</td>
+    <td style="font-size:10px;color:var(--text2)">${b.market}</td>
+    <td style="font-family:var(--fontD);font-weight:700;color:var(--accent2)">${fmt(b.stake)}</td>
+    <td style="font-family:var(--fontD);font-weight:700">${fmtN(b.odds)}x</td>
+    <td style="font-family:var(--fontD);font-weight:700;color:var(--green)">${fmt(b.payout)}</td>
+    <td><span class="badge ${b.status==='won'?'bg-green':b.status==='lost'?'bg-red':b.status==='void'?'bg-gray':'bg-orange'}">${b.status.toUpperCase()}</span></td>
+    <td>${b.status==='pending'?`<div style="display:flex;gap:5px">
+      <button onclick="settleBet('${b.id}','won')" style="padding:4px 10px;background:rgba(16,185,129,.15);border:1px solid var(--green);color:var(--green);border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;font-family:var(--font)" onmouseover="this.style.background='var(--green)';this.style.color='#fff'" onmouseout="this.style.background='rgba(16,185,129,.15)';this.style.color='var(--green)'">✅ WON</button>
+      <button onclick="settleBet('${b.id}','lost')" style="padding:4px 10px;background:rgba(244,63,94,.15);border:1px solid var(--red);color:var(--red);border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;font-family:var(--font)" onmouseover="this.style.background='var(--red)';this.style.color='#fff'" onmouseout="this.style.background='rgba(244,63,94,.15)';this.style.color='var(--red)'">❌ LOST</button>
+      <button onclick="settleBet('${b.id}','void')" style="padding:4px 10px;background:rgba(139,165,192,.1);border:1px solid var(--border2);color:var(--text2);border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;font-family:var(--font)">↩ VOID</button>
+    </div>`:`<span style="font-size:11px;color:var(--text3)">Settled</span>`}</td>
+  </tr>`).join('');
+  updateSettleStats();
+}
+function settleBet(betId,result){
+  const bet=betHistory.find(b=>b.id===betId);
+  if(!bet||bet.status!=='pending') return;
+  bet.status=result;
+  if(result==='won'){balance+=bet.payout;totalWon+=bet.payout;wins++;houseProfit+=parseFloat((bet.stake*HOUSE_EDGE).toFixed(2));addTx('WIN',`Won: ${bet.pick} (${bet.id})`,bet.payout);toast('win',`✅ Bet ${betId} — WON`,`${fmt(bet.payout)} credited`);}
+  else if(result==='lost'){houseProfit+=bet.stake;addTx('LOSS',`Lost: ${bet.pick} (${bet.id})`,0);toast('loss',`❌ Bet ${betId} — LOST`,`${fmt(bet.stake)} house profit`);}
+  else if(result==='void'){balance+=bet.stake;totalWagered-=bet.stake;addTx('REFUND',`Void: ${bet.pick} (${bet.id})`,bet.stake);toast('info',`↩ Bet ${betId} — VOID`,`${fmt(bet.stake)} refunded`);}
+  updateBalUI();updateAdminUI();renderSettleTable();renderBetsTable(betHistory);updateMyBetsStats();
+}
+function updateSettleStats(){
+  const pending=betHistory.filter(b=>b.status==='pending');
+  const won=betHistory.filter(b=>b.status==='won');
+  const lost=betHistory.filter(b=>b.status==='lost');
+  const staked=pending.reduce((s,b)=>s+b.stake,0);
+  const pc=document.getElementById('settlePendingCount'); if(pc) pc.textContent=pending.length;
+  const ts=document.getElementById('settleTotalStaked'); if(ts) ts.textContent=fmt(staked);
+  const wc=document.getElementById('settleWonCount');    if(wc) wc.textContent=won.length;
+  const lc=document.getElementById('settleLostCount');   if(lc) lc.textContent=lost.length;
+}
+
+// ================================================================
+// WALLET & TRANSACTIONS
+// ================================================================
+function addTx(type,desc,amount){txHistory.unshift({time:new Date().toLocaleTimeString(),type,desc,amount,balance});renderTxTable();}
+function renderTxTable(){
+  const el=document.getElementById('txTable'); if(!el) return;
+  el.innerHTML=txHistory.length?txHistory.map(t=>`<tr>
+    <td style="font-size:10px;color:var(--text3)">${t.time}</td>
+    <td><span class="badge ${t.type==='WIN'?'bg-green':t.type==='DEPOSIT'?'bg-blue':'bg-orange'}">${t.type}</span></td>
+    <td style="font-size:11px">${t.desc}</td>
+    <td style="font-family:var(--fontD);font-weight:700;color:${t.amount>=0?'var(--green)':'var(--red)'}">${t.amount>=0?'+':'-'}${fmt(Math.abs(t.amount))}</td>
+    <td style="font-family:var(--fontD)">${fmt(t.balance)}</td>
+  </tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3)">No transactions</td></tr>';
+}
+function updateBalUI(){
+  const f=v=>v.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('headerBal').textContent=f(balance);
+  document.getElementById('walletBal').textContent='₹'+f(balance);
+  const ww=document.getElementById('wWag');  if(ww)  ww.textContent=fmt(totalWagered);
+  const wo=document.getElementById('wWon');  if(wo)  wo.textContent=fmt(totalWon);
+  const wbt=document.getElementById('wBets');if(wbt) wbt.textContent=totalBets;
+  const pl=balance-1000;
+  const wp=document.getElementById('wPL');
+  if(wp){wp.textContent=(pl>=0?'+':'')+'₹'+f(Math.abs(pl));wp.style.color=pl>=0?'var(--green)':'var(--red)';}
+  const auBal=document.getElementById('auBal');     if(auBal)  auBal.textContent='₹'+f(balance);
+  const auBets=document.getElementById('auBets');   if(auBets) auBets.textContent=totalBets;
+  const auWag=document.getElementById('auWagered'); if(auWag)  auWag.textContent=fmt(totalWagered);
+  const auWon=document.getElementById('auWon');     if(auWon)  auWon.textContent=fmt(totalWon);
+}
+function doDeposit(){
+  const amt=parseFloat(document.getElementById('depAmt')?.value)||0;
+  if(amt<10){toast('warn','Minimum ₹10','');return;}
+  balance+=amt;updateBalUI();addTx('DEPOSIT','Deposit via UPI',amt);closeModal('depositModal');toast('info','Funds Added',`${fmt(amt)} added`);
+}
+function doWithdraw(){
+  const amt=parseFloat(document.getElementById('withdrawAmt')?.value)||0;
+  if(amt<100){toast('warn','Minimum ₹100 withdrawal','');return;}
+  if(amt>balance){toast('warn','Insufficient Balance','');return;}
+  balance-=amt;updateBalUI();addTx('WITHDRAW','Withdrawal request',-amt);closeModal('withdrawModal');toast('info','Withdrawal Requested',`${fmt(amt)} processing`);
+}
+function setDepAmt(v){const e=document.getElementById('depAmt');if(e)e.value=v;}
+
+// ================================================================
+// LIVE FEED
+// ================================================================
+function addFeedItem(pick,match,amt,won){
+  const el=document.getElementById('liveFeed'); if(!el) return;
+  const name=FEED_NAMES[Math.floor(Math.random()*FEED_NAMES.length)];
+  const div=document.createElement('div');
+  div.className='feed-item';
+  div.innerHTML=`<div class="fi-av">${name[0]}</div><div style="flex:1;min-width:0"><div class="fi-name">${name}</div><div class="fi-detail">${match||pick}</div></div><div class="fi-amt" style="color:${won?'var(--green)':'var(--red)'}">${won?'+':'-'}${fmt(amt||Math.random()*400+20)}</div>`;
+  el.insertBefore(div,el.firstChild);
+  while(el.children.length>14) el.removeChild(el.lastChild);
+}
+function autoFeed(){
+  const all=allLiveList(); if(!all.length) return;
+  const m=all[Math.floor(Math.random()*all.length)];
+  const won=Math.random()>0.45;
+  addFeedItem(m.t1+' wins',`${m.t1} vs ${m.t2}`,Math.floor(Math.random()*800+50)+0.00,won);
+}
+
+// ================================================================
+// ADMIN
+// ================================================================
+function updateAdminUI(){
+  const ap=document.getElementById('adProfit'); if(ap) ap.textContent=fmt(houseProfit);
+  const av=document.getElementById('adVolume'); if(av) av.textContent=fmt(totalWagered);
+  const ab=document.getElementById('adBets');   if(ab) ab.textContent=totalBets;
+  const aw=document.getElementById('adWL');     if(aw) aw.textContent=`${wins}W / ${totalBets-wins}L`;
+  const tbody=document.getElementById('adBetTable');
+  if(tbody&&betHistory.length){
+    tbody.innerHTML=betHistory.slice(0,10).map(b=>`<tr>
+      <td><span class="user-avatar" style="width:22px;height:22px;font-size:9px">U</span>User</td>
+      <td style="font-size:11px">${b.match}</td>
+      <td>${fmt(b.stake)}</td>
+      <td>${fmtN(b.odds)}x</td>
+      <td><span class="badge ${b.status==='won'?'bg-green':b.status==='lost'?'bg-red':'bg-orange'}">${b.status}</span></td>
+    </tr>`).join('');
+  }
+}
+function updateAdminLiveCounts(){
+  const lc=liveMatches.cricket?.length||0,lf=liveMatches.football?.length||0,lt=liveMatches.tennis?.length||0;
+  const total=lc+lf+lt;
+  const pc=document.getElementById('progCricket');   if(pc) pc.style.width=(total?lc/total*100:0)+'%';
+  const pf=document.getElementById('progFootball');  if(pf) pf.style.width=(total?lf/total*100:0)+'%';
+  const pt=document.getElementById('progTennis');    if(pt) pt.style.width=(total?lt/total*100:0)+'%';
+  const pnc=document.getElementById('progCricketNum');  if(pnc) pnc.textContent=lc;
+  const pnf=document.getElementById('progFootballNum'); if(pnf) pnf.textContent=lf;
+  const pnt=document.getElementById('progTennisNum');   if(pnt) pnt.textContent=lt;
+}
+function renderAdminMatchTable(){
+  const tbody=document.getElementById('adMatchTable'); if(!tbody) return;
+  const all=[...allMatchesList(),...customMatches].filter((m,i,a)=>a.findIndex(x=>x.id===m.id)===i);
+  tbody.innerHTML=all.length?all.map(m=>`<tr>
+    <td>${{cricket:'🏏',football:'⚽',tennis:'🎾',basketball:'🏀'}[m.sport]||'🎮'} ${m.sport}</td>
+    <td style="font-weight:600">${m.t1} vs ${m.t2}</td>
+    <td style="font-size:10px;color:var(--text2)">${m.league||'-'}</td>
+    <td style="font-size:10px;color:var(--text3)">${m.time||'Live'}</td>
+    <td style="font-family:var(--fontD);font-weight:700">${fmtN(m.o1)}</td>
+    <td style="font-family:var(--fontD)">${m.oDraw?fmtN(m.oDraw):'-'}</td>
+    <td style="font-family:var(--fontD);font-weight:700">${fmtN(m.o2)}</td>
+    <td><span class="badge ${m.status==='live'?'bg-red':m.status==='upcoming'?'bg-blue':'bg-gray'}">${m.status}</span></td>
+    <td>
+      <button class="ba-btn" onclick="suspendMarket(${m.id})">Suspend</button>
+      <button class="ba-btn" onclick="removeCustomMatch(${m.id})" style="color:var(--red);border-color:rgba(244,63,94,.3)">Remove</button>
+    </td>
+  </tr>`).join(''):'<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">No matches</td></tr>';
+}
+function suspendMarket(id){toast('warn','Market Suspended',`Match #${id} suspended`);}
+function removeCustomMatch(id){
+  const i=customMatches.findIndex(m=>m.id==id);
+  if(i>-1){customMatches.splice(i,1);renderAdminMatchTable();renderAllPages();toast('info','Match Removed','');}
+}
+function addCustomMatch(){
+  const sport=document.getElementById('amSport').value;
+  const t1=document.getElementById('amT1').value.trim(),t2=document.getElementById('amT2').value.trim();
+  if(!t1||!t2){toast('warn','Enter both team names','');return;}
+  const isLive=document.getElementById('amIsLive').checked;
+  const m={
+    id:Date.now(),sport,
+    league:document.getElementById('amLeague').value||sport.charAt(0).toUpperCase()+sport.slice(1),
+    t1,t2,
+    venue:document.getElementById('amVenue').value,
+    o1:parseFloat(document.getElementById('amO1').value)||1.90,
+    oDraw:sport==='football'?parseFloat(document.getElementById('amOD').value)||3.50:null,
+    o2:parseFloat(document.getElementById('amO2').value)||1.95,
+    oOU:parseFloat(document.getElementById('amOU').value)||(sport==='cricket'?165.5:2.5),
+    oOver:toOdd(0.50),oUnder:toOdd(0.50),oToss1:toOdd(0.50),oToss2:toOdd(0.50),
+    o6s1:toOdd(0.52),o6s2:toOdd(0.48),
+    o1H1:toOdd(0.40),o1H2:toOdd(0.35),oDH:toOdd(0.25),oSet1:toOdd(0.52),oSet2:toOdd(0.48),
+    status:isLive?'live':'upcoming',
+    time:document.getElementById('amDate').value+' '+document.getElementById('amTime').value,
+    score1:isLive?(sport==='football'?0:null):null,
+    score2:isLive?(sport==='football'?0:null):null,
+    minute:isLive?(sport==='football'?1:'0.0'):null,
+    apiSource:'Manual',bookmaker:'Manual',
+  };
+  customMatches.push(m);
+  renderAdminMatchTable();renderAllPages();closeModal('addMatchModal');toast('info','Match Added',`${t1} vs ${t2}`);
+  ['amT1','amT2','amVenue','amLeague'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+}
+function toggleDrawField(){
+  const s=document.getElementById('amSport').value;
+  const df=document.getElementById('drawField');
+  if(df) df.style.display=s==='football'?'block':'none';
+}
+function adminAdjustBal(amt){balance=Math.max(0,balance+amt);updateBalUI();toast('info','Balance Adjusted',`${amt>=0?'+':''}${fmt(amt)}`);}
+function adminBanUser(){toast('warn','User Banned','User has been banned');}
+function updateStatusCounts(){
+  const lc=allLiveList().length,uc=allUpcomingList().length;
+  const sEl=document.getElementById('statusLiveCount');   if(sEl) sEl.textContent=lc;
+  const uEl=document.getElementById('statusUpcomingCount'); if(uEl) uEl.textContent=uc;
+  const badge=document.getElementById('liveCountBadge');  if(badge) badge.textContent=lc+' LIVE';
+  const cb=document.getElementById('cricketBadge');       if(cb) cb.textContent=(liveMatches.cricket.length+upcomingMatches.cricket.length);
+  const fb=document.getElementById('footballBadge');      if(fb) fb.textContent=(liveMatches.football.length+upcomingMatches.football.length);
+  const tb=document.getElementById('tennisBadge');        if(tb) tb.textContent=(liveMatches.tennis.length+upcomingMatches.tennis.length);
+}
+
+// ================================================================
+// API CONFIG PAGE
+// ================================================================
+function selectProvider(p){
+  selectedProvider=p;
+  document.querySelectorAll('.api-provider').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('prov-'+p); if(el) el.classList.add('active');
+  const pn=document.getElementById('statusProvider');
+  if(pn) pn.textContent={oddsapi:'The Odds API',sportsdb:'TheSportsDB'}[p]||p;
+}
+async function saveApiConfig(){
+  apiConfig={provider:selectedProvider,key:document.getElementById('apiKeyInput')?.value||ODDS_API_KEY,interval:parseFloat(document.getElementById('refreshInterval')?.value||30)};
+  setApiStatus('loading','🔄 Connecting to The Odds API...');
+  const ok=await fetchAllData().catch(()=>false);
+  if(ok){startDataRefresh();toast('info','✅ Connected','Live odds data active');}
+  else toast('warn','⚠️ Connection Failed','Check API key & quota');
+}
+function setApiStatus(state,text){
+  const dot=document.getElementById('apiDot');
+  const st=document.getElementById('apiStatusText');
+  if(dot) dot.className='api-dot '+state;
+  if(st) st.textContent=text;
+  const se=document.getElementById('statusState');
+  if(se){se.className='badge '+(state==='connected'?'bg-green':state==='error'?'bg-red':'bg-orange');se.textContent=state==='connected'?'Connected':state==='error'?'Error':'Connecting...';}
+}
+
+// ================================================================
+// NAVIGATION
+// ================================================================
+function navTo(page,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('pg-'+page); if(pg) pg.classList.add('active');
+  if(el) el.classList.add('active');
+  if(page==='live') renderLivePage();
+  else if(page==='upcoming') renderUpcomingPage();
+  else if(page==='cricket'){renderSportPage('cricket','cricketContainer','betSlipContainer2');renderPointsTable('iplPoints');}
+  else if(page==='football') renderSportPage('football','footballContainer','betSlipContainer3');
+  else if(page==='tennis') renderSportPage('tennis','tennisContainer','betSlipContainer4');
+  else if(page==='basketball') renderSportPage('basketball','basketballContainer','betSlipContainer5');
+  else if(page==='myBets'){renderBetsTable(betHistory);updateMyBetsStats();}
+  else if(page==='wallet'){updateBalUI();renderTxTable();}
+  else if(page==='adminDash'){updateAdminUI();renderPointsTable('iplPointsAdmin');updateAdminLiveCounts();}
+  else if(page==='adminMatches') renderAdminMatchTable();
+  else if(page==='adminSettle'){renderSettleTable();updateSettleStats();}
+  if(window.innerWidth<700) document.getElementById('sidebar').classList.remove('open');
+}
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  if(window.innerWidth<700) sb.classList.toggle('open');
+  else sb.classList.toggle('mini');
+}
+
+// ================================================================
+// MODALS & TOAST
+// ================================================================
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});
+function toast(type,title,sub){
+  const icons={win:'🏆',loss:'💔',info:'ℹ️',warn:'⚠️'};
+  const c=document.getElementById('toastContainer');
+  const el=document.createElement('div');
+  el.className='toast '+(type==='win'?'win':type==='loss'?'loss':type==='warn'?'warn':'info');
+  el.innerHTML=`<span class="t-icon">${icons[type]||'ℹ️'}</span><div><div class="t-t">${title}</div>${sub?`<div class="t-s">${sub}</div>`:''}</div>`;
+  c.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(30px)';el.style.transition='all .3s';setTimeout(()=>el.remove(),300);},3500);
+}
+
+// ================================================================
+// ADMIN PASSWORD GATE
+// ================================================================
+const ADMIN_PASS='Classy35';
+let adminUnlocked=false;
+function openAdminLogin(){document.getElementById('adminPasswordInput').value='';document.getElementById('adminLoginError').style.display='none';openModal('adminLoginModal');setTimeout(()=>document.getElementById('adminPasswordInput').focus(),100);}
+function checkAdminPassword(){
+  const val=document.getElementById('adminPasswordInput').value;
+  if(val===ADMIN_PASS){
+    adminUnlocked=true;closeModal('adminLoginModal');
+    document.getElementById('adminNavSection').style.display='';
+    document.getElementById('adminNavItems').style.display='';
+    document.getElementById('adminLockBtn').style.display='none';
+    document.getElementById('addFundsBottom').style.display='';
+    document.getElementById('addFundsBottomHidden').style.display='none';
+    toast('info','🔓 Admin Unlocked','Welcome, Admin');
+  } else {
+    document.getElementById('adminLoginError').style.display='block';
+    document.getElementById('adminPasswordInput').value='';
+    document.getElementById('adminPasswordInput').focus();
+  }
+}
+
+// ================================================================
+// INIT
+// ================================================================
+function init(){
+  // Pre-fill API key in config page
+  const ki=document.getElementById('apiKeyInput'); if(ki) ki.value=ODDS_API_KEY;
+  selectProvider('oddsapi');
+  setApiStatus('loading','🔗 Connecting to The Odds API...');
+  renderLivePage();
+  renderPointsTable('iplPoints');
+  renderPointsTable('iplPointsAdmin');
+  renderAdminMatchTable();
+  updateBalUI();
+  updateTicker();
+  updateAdminLiveCounts();
+  toggleDrawField();
+
+  // Kick off live data fetch
+  fetchAllData()
+    .then(ok=>{
+      if(ok){
+        const lc=allLiveList().length;
+        toast('info','✅ The Odds API Connected',`${lc} live matches · real odds loaded`);
+        startDataRefresh();
+      } else {
+        setApiStatus('error','⚠️ Odds API unavailable — check quota or key');
+        toast('warn','⚠️ Connection Failed','Check API key or usage quota');
+        setTimeout(()=>fetchAllData().then(ok=>{if(ok)startDataRefresh();}),60000);
+      }
+    })
+    .catch(()=>{
+      setApiStatus('error','⚠️ Network error');
+      toast('warn','Network Error','Check your internet connection');
+      setTimeout(()=>fetchAllData().then(ok=>{if(ok)startDataRefresh();}),60000);
+    });
+
+  setInterval(autoFeed,4000);
+  setInterval(updateTicker,8000);
+  setInterval(updateStatusCounts,15000);
+}
+
+init();
+</script>
+
+<!-- ══════════════════════════════════════════════════
+     STAKE SPORTSBOOK RULEBOOK — Tennis · Cricket · Football
+     Source: stake.com/policies/sportsbook
+     ══════════════════════════════════════════════════ -->
+
+<!-- Floating Rulebook Button -->
+<button id="rulebookBtn" onclick="toggleRulebook()" title="Sportsbook Rules">
+  📖
+  <span class="rb-tooltip">Sportsbook Rules</span>
+</button>
+
+<!-- Rulebook Panel -->
+<div id="rulebookPanel">
+  <div class="rb-header">
+    <div class="rb-title">📖 <span>Stake</span> Rulebook</div>
+    <button class="rb-close" onclick="toggleRulebook()">✕</button>
+  </div>
+  <div class="rb-tabs">
+    <div class="rb-tab active" onclick="switchRbTab('tennis',this)">🎾 Tennis</div>
+    <div class="rb-tab" onclick="switchRbTab('cricket',this)">🏏 Cricket</div>
+    <div class="rb-tab" onclick="switchRbTab('football',this)">⚽ Football</div>
+  </div>
+  <div class="rb-body">
+
+    <!-- ── TENNIS ── -->
+    <div class="rb-sport-panel active" id="rb-tennis">
+      <div class="rb-section">
+        <div class="rb-sec-title">⚡ Match Start & Validity</div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">A tennis match is deemed to have <b>started with the first serve</b> of the match.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">If a player <b>retires, is disqualified, or a walkover</b> occurs, all markets will be <b>void</b> unless already unconditionally determined.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">This includes all undecided <b>point, game, or set-related</b> bets.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">🌧 Delays & Suspension</div>
+        <div class="rb-rule"><div class="rb-rule-icon">⏸</div><div class="rb-rule-text">In case of any <b>delay (rain, darkness…)</b> all markets remain unsettled; trading resumes when the match continues.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">⏸</div><div class="rb-rule-text">If match is abandoned/suspended before a natural end and <b>does not resume within 5 hours</b>, all bets are <b>Auto Voided</b>.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">📋 Scoring & Markets</div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">If <b>penalty points</b> are awarded by the umpire, all bets on that game will <b>stand</b>.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">⚠</div><div class="rb-rule-text">If markets remain open with an <b>incorrect score</b> significantly impacting prices, Stake reserves the right to <b>void betting</b>.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">⚠</div><div class="rb-rule-text">If <b>players/teams are displayed incorrectly</b>, Stake reserves the right to void betting.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">A <b>match tie-break</b> played as deciding set in Best-of-3 format is counted as the <b>3rd set</b>. Tie-breaks count as <b>one game</b> for game totals.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">🏟 Venue Changes</div>
+        <div class="rb-rule"><div class="rb-rule-icon">✗</div><div class="rb-rule-text">All bets created prior to a <b>venue change</b> shall be <b>Auto Voided</b>.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">📊 Status Summary</div>
+        <div class="rb-badge-row">
+          <span class="rb-badge void">Retirement → VOID</span>
+          <span class="rb-badge void">Walkover → VOID</span>
+          <span class="rb-badge stand">Penalty pts → STAND</span>
+          <span class="rb-badge suspended">Delay → SUSPENDED</span>
+          <span class="rb-badge void">Venue change → VOID</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CRICKET ── -->
+    <div class="rb-sport-panel" id="rb-cricket">
+      <div class="rb-section">
+        <div class="rb-sec-title">⚡ Match Validity & Abandonment</div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">If a match is <b>postponed</b>, all markets are voided unless it starts on the <b>scheduled day (local time)</b>.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">If <b>abandoned</b>, all undecided markets are voided unless the match continues within <b>48 hours</b> of the official start time.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text"><b>Fully decided markets</b> at time of abandonment (e.g. "First Team to Score") will still be settled.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">🌧 Weather & DLS Method</div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">If match is affected by bad weather, bets are settled on the <b>official competition rule</b> including the <b>Duckworth-Lewis (DL)</b> or Jayadevan (VJD) method.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">⏸</div><div class="rb-rule-text">In case of any delay (rain, etc.) all markets remain unsettled; trading resumes when match continues.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✗</div><div class="rb-rule-text">Where no price is quoted for the tie and no winner is determined, all wagers will be <b>voided/cancelled</b>.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">👤 Player Props</div>
+        <div class="rb-rule"><div class="rb-rule-icon">✗</div><div class="rb-rule-text">Bets on any player <b>not in the starting 11</b> are <b>void</b>.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text"><b>Player Must Play</b> applies to all pre-match Player Props — the player must participate for bets to stand.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">🏟 Venue Changes</div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">If venue changes but the <b>home team retains home designation</b>, bets stand.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✗</div><div class="rb-rule-text">If the <b>home and away teams are reversed</b>, all prior bets are <b>void</b>.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">⚠ Errors & Integrity</div>
+        <div class="rb-rule"><div class="rb-rule-icon">⚠</div><div class="rb-rule-text">Stake reserves the right to <b>void bets</b> placed with an incorrect score or due to technical fault/transmission error.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">Third-party content (scores, analytics) is provided by external providers. Stake is <b>not responsible</b> for third-party data accuracy.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">📊 Status Summary</div>
+        <div class="rb-badge-row">
+          <span class="rb-badge void">Abandoned &gt;48h → VOID</span>
+          <span class="rb-badge stand">DLS result → STAND</span>
+          <span class="rb-badge void">Non-starter prop → VOID</span>
+          <span class="rb-badge stand">Decided markets → SETTLED</span>
+          <span class="rb-badge suspended">Delay → SUSPENDED</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FOOTBALL ── -->
+    <div class="rb-sport-panel" id="rb-football">
+      <div class="rb-section">
+        <div class="rb-sec-title">⚡ Match Validity</div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">If a match is <b>postponed</b>, all markets are voided unless it starts on the <b>scheduled day (local time)</b>.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">If <b>abandoned</b> and completed within <b>48 hours</b> of the scheduled start, open bets are settled on the final result.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✗</div><div class="rb-rule-text">If <b>not completed within 48 hours</b>, all undecided bets are considered <b>void</b>.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">Markets <b>already determined</b> at abandonment (e.g. "First goalscorer") are still settled normally.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">🏟 Venue & Opponent Changes</div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">If venue changes but the <b>match is not switched to the opponent's ground</b> and home/away are unchanged, bets stand.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✗</div><div class="rb-rule-text">If <b>home and away are reversed</b>, Stake reserves the right to <b>void betting</b>.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✗</div><div class="rb-rule-text">If the <b>opponent changes</b> from the listed team, all bets for that match are <b>void</b>.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">⏱ Overtime & Markets</div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text"><b>3-way Match Betting</b> and <b>Double Chance</b> markets exclude overtime unless stated otherwise.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">Markets do not consider overtime unless otherwise stated. <b>Half-time</b> markets are settled on the first half only.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✗</div><div class="rb-rule-text">If match is abandoned before half-time, half-time bet is <b>void</b> unless already unconditionally determined.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">🎯 Goals & Totals</div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">Total goals count regardless of whether scored before or after the bet was placed (unlike Asian lines).</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✗</div><div class="rb-rule-text">If game is abandoned, <b>Over/Under bets are void</b> unless outcome is already determined.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text"><b>Asian Handicap</b>: result before bet placement is ignored for settlement. Abandoned games → bets void.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">⚠ Errors & Integrity</div>
+        <div class="rb-rule"><div class="rb-rule-icon">⚠</div><div class="rb-rule-text">If markets remain open with an <b>incorrect score or match time</b> (>89 seconds off), Stake reserves the right to <b>void betting</b>.</div></div>
+        <div class="rb-rule"><div class="rb-rule-icon">✓</div><div class="rb-rule-text">Note: Games with start dates altered <b>well in advance</b> for TV/fixture reasons are <b>not classed as postponed</b>.</div></div>
+      </div>
+      <div class="rb-divider"></div>
+      <div class="rb-section">
+        <div class="rb-sec-title">📊 Status Summary</div>
+        <div class="rb-badge-row">
+          <span class="rb-badge void">Abandoned &gt;48h → VOID</span>
+          <span class="rb-badge stand">Abandoned &lt;48h → SETTLED</span>
+          <span class="rb-badge void">Opponent changed → VOID</span>
+          <span class="rb-badge void">Home/Away reversed → VOID</span>
+          <span class="rb-badge stand">Decided mkt → SETTLED</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.rb-body -->
+  <div class="rb-footer">
+    <a href="https://stake.com/policies/sportsbook" target="_blank" rel="noopener">View full Stake Sportsbook Policy ↗</a>
+  </div>
+</div><!-- /#rulebookPanel -->
+
+<script>
+function toggleRulebook(){
+  const panel=document.getElementById('rulebookPanel');
+  panel.classList.toggle('open');
+}
+function switchRbTab(sport,el){
+  document.querySelectorAll('.rb-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.rb-sport-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('rb-'+sport).classList.add('active');
+}
+// Close rulebook if clicking outside
+document.addEventListener('click',function(e){
+  const panel=document.getElementById('rulebookPanel');
+  const btn=document.getElementById('rulebookBtn');
+  if(panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target)){
+    panel.classList.remove('open');
+  }
+});
+</script>
+
+</body>
+</html>
